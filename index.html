@@ -7,27 +7,42 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;padding-bottom:2rem}
-.title-bar{background:#1a2744;color:#fff;padding:.45rem 1rem;display:flex;align-items:center;gap:.75rem;font-family:Arial,sans-serif;font-size:.78rem}
-.title-bar .logo{font-size:1rem}
-.title-bar .doc-name{font-weight:600;letter-spacing:.04em;flex:1}
-.title-bar .hint{font-size:.7rem;color:#8a9fc0}
+
+/* BARRA DE TÍTULO PREMIUM - PREDICTA */
+.title-bar {
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  background: linear-gradient(135deg, #111b30 0%, #1a2744 100%); 
+  color: #ffffff; 
+  padding: .6rem 1.2rem; 
+  font-family: 'Segoe UI', Arial, sans-serif; 
+  font-size: .8rem; 
+  box-shadow: inset 0 -1px 0 rgba(255,255,255,0.1); 
+  border-bottom: 1px solid #0d1526;
+}
+
 .ribbon{background:#f0ede8;border-bottom:1px solid #c8b898;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.12)}
 .ribbon-tabs{display:flex;background:#e0dbd4;border-bottom:1px solid #c8b898}
 .rtab{padding:.3rem .9rem;font-size:.75rem;font-family:Arial,sans-serif;cursor:pointer;color:#555;border:none;background:none;border-bottom:2px solid transparent;transition:all .15s}
 .rtab:hover{background:rgba(26,39,68,.07);color:#1a2744}
 .rtab.active{background:#f0ede8;color:#1a2744;font-weight:700;border-bottom:2px solid #1a2744}
-.ribbon-panel{display:none;padding:.4rem .75rem;align-items:center;gap:.25rem;flex-wrap:wrap}
+
+/* PANELES DEL RIBBON ALINEADOS EN FLOW HORIZONTAL */
+.ribbon-panel{display:none;padding:.4rem .75rem;align-items:center;gap:.6rem;flex-wrap:nowrap;overflow-x:auto}
 .ribbon-panel.active{display:flex}
-.rsep{width:1px;height:28px;background:#c8b898;margin:0 .35rem;flex-shrink:0}
-.rgroup{display:flex;align-items:center;gap:.2rem}
-.rgroup-label{font-size:.62rem;color:#888;font-family:Arial,sans-serif;text-align:center;margin-top:.15rem;display:block}
-.rgroup-wrap{display:flex;flex-direction:column;align-items:center}
-.rb{min-width:28px;height:28px;padding:0 6px;border:1px solid transparent;border-radius:3px;background:none;cursor:pointer;font-family:Arial,sans-serif;font-size:.8rem;color:#333;transition:all .12s;display:flex;align-items:center;justify-content:center;gap:3px;white-space:nowrap}
+.rsep{width:1px;height:34px;background:#c8b898;margin:0 .2rem;flex-shrink:0}
+.rgroup-wrap{display:flex;flex-direction:column;align-items:center;justify-content:space-between;height:42px}
+.rgroup{display:flex;align-items:center;gap:.3rem;flex-direction:row}
+.rgroup-label{font-size:.62rem;color:#888;font-family:Arial,sans-serif;text-align:center;line-height:1;margin-top:2px}
+
+.rb{min-width:28px;height:26px;padding:0 6px;border:1px solid transparent;border-radius:3px;background:none;cursor:pointer;font-family:Arial,sans-serif;font-size:.8rem;color:#333;transition:all .12s;display:flex;align-items:center;justify-content:center;gap:3px;white-space:nowrap}
 .rb:hover{background:#ddd8d0;border-color:#c0b8b0}
 .rb.active{background:#c8d8f0;border-color:#6a9cd0;color:#1a2744}
 .rb.primary{background:#1a2744;color:#fff;padding:0 10px}
 .rb.primary:hover{background:#243568}
 .rb.danger{background:#c0392b;color:#fff;padding:0 8px}
+.rb.danger:hover{background:#a93224}
 .rb.gold{background:#c8a84b;color:#fff;padding:0 10px}
 .rb.gold:hover{background:#b89640}
 .rb-b{font-weight:700}
@@ -38,11 +53,13 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
 .color-wrap{position:relative;display:inline-flex;flex-direction:column;align-items:center}
 .color-inp{width:24px;height:20px;border:none;padding:0;cursor:pointer;background:none}
 .color-bar{height:4px;width:20px;border-radius:2px;margin-top:1px;pointer-events:none}
+
+/* ZONA DE PEGADO MEJORADA PARA FORMATO ENRIQUECIDO */
 .paste-zone{background:#fff8e8;border:2px dashed #c8a84b;border-radius:6px;margin:.75rem auto;max-width:860px;padding:.9rem 1.1rem;display:none}
 .paste-zone.visible{display:block}
 .paste-zone label{font-size:.78rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:.4rem;font-family:Arial,sans-serif}
-.paste-zone textarea{width:100%;height:120px;border:1px solid #ddd;border-radius:4px;padding:.5rem;font-family:'Times New Roman',serif;font-size:12pt;resize:vertical;outline:none}
 .paste-actions{display:flex;gap:.5rem;margin-top:.5rem;align-items:center;flex-wrap:wrap}
+
 .status-bar{background:#e8e4de;border-bottom:1px solid #c8b898;padding:.25rem 1rem;display:flex;align-items:center;gap:1.5rem;font-family:Arial,sans-serif;font-size:.7rem;color:#666;flex-wrap:wrap}
 .status-bar .zoom-ctrl{display:flex;align-items:center;gap:.4rem;margin-left:auto}
 .status-bar .pagnav{display:flex;align-items:center;gap:.3rem}
@@ -67,34 +84,17 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
 .find-bar .find-info{font-size:.7rem;color:#888;margin-left:auto}
 .hl-find{background:#ffe08a;border-radius:2px}
 .hl-find.current{background:#ff9900;color:#fff}
-/* Guías de margen visuales */
+
 .page.show-guides::before {
-  content: '';
-  position: absolute;
-  top: 97px;
-  bottom: 65px;
-  left: 81px;
-  right: 52px;
-  border: 1px dashed rgba(26, 39, 68, 0.22);
-  pointer-events: none;
-  z-index: 10;
+  content: ''; position: absolute; top: 97px; bottom: 65px; left: 81px; right: 52px;
+  border: 1px dashed rgba(26, 39, 68, 0.22); pointer-events: none; z-index: 10;
 }
 .page.show-guides::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 81px;
-  background: rgba(0, 0, 0, 0.025);
-  border-right: 1px solid rgba(0, 0, 0, 0.06);
-  pointer-events: none;
-  z-index: 9;
+  content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 81px;
+  background: rgba(0, 0, 0, 0.025); border-right: 1px solid rgba(0, 0, 0, 0.06); pointer-events: none; z-index: 9;
 }
-/* Advertencia de desborde */
 .rt.overflow-warn {
-  border-bottom: 2px solid #e74c3c !important;
-  background: rgba(231, 76, 60, 0.04) !important;
+  border-bottom: 2px solid #e74c3c !important; background: rgba(231, 76, 60, 0.04) !important;
 }
 
 @media print{
@@ -119,24 +119,20 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
 </head>
 <body>
 
-<div class="title-bar" style="display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #111b30 0%, #1a2744 100%); color: #ffffff; padding: .6rem 1.2rem; font-family: 'Segoe UI', Arial, sans-serif; font-size: .8rem; box-shadow: inset 0 -1px 0 rgba(255,255,255,0.1); border-bottom: 1px solid #0d1526;">
-    
-    <div class="doc-name" style="font-weight: 600; letter-spacing: .03em; flex: 1; display: flex; align-items: center; gap: 6px;">
-        <span class="logo" style="font-size: 1.1rem; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));">⚖️</span> 
-        <span style="color: #ffffff;">Plantilla Judicial</span>
+<div class="title-bar">
+    <div class="doc-name">
+        <span class="logo">⚖️</span> <span>Plantilla Judicial</span>
         <span style="background: rgba(255,255,255,0.15); padding: 1px 6px; border-radius: 3px; font-size: .65rem; font-weight: 400; color: #d1dbed; margin-left: 4px;">v2.0</span>
     </div>
-    
     <div style="text-align: center; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2;">
         <span style="font-size: .85rem; font-weight: 600; letter-spacing: .05em; color: #ffffff; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">PREDICTA</span>
         <span style="font-size: .68rem; font-weight: 400; color: #a4b3cf; letter-spacing: .02em; margin-top: 1px;">Dra. María Florencia Suarez</span>
     </div>
-    
-    <div class="hint" style="font-size: .72rem; color: #8a9fc0; flex: 1; text-align: right; font-weight: 500; letter-spacing: .02em;">
+    <div class="hint">
         Regulación 26 Renglones · <span style="color: #cbdcf7;">Santa Fe</span>
     </div>
-
 </div>
+
 <div class="ribbon">
   <div class="ribbon-tabs">
     <button class="rtab active" onclick="showTab(event,'inicio')">Inicio</button>
@@ -144,13 +140,14 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
     <button class="rtab" onclick="showTab(event,'vista')">Vista</button>
     <button class="rtab" onclick="showTab(event,'archivo')">Archivo</button>
   </div>
+  
   <div class="ribbon-panel active" id="tab-inicio">
     <div class="rgroup-wrap">
       <div class="rgroup">
         <button class="rb primary" onclick="togglePaste()">&#128203; Pegar texto</button>
-        <button class="rb gold" onclick="reajustarTexto(false)" title="Ajusta todo el texto del documento para adaptarlo a la tipografía o tamaño actual">🔄 Reajustar texto</button>
+        <button class="rb gold" onclick="reajustarTexto(false)" title="Ajusta todo el texto del documento para adaptarlo a la tipografía o tamaño actual">🔄 Reajustar</button>
       </div>
-      <span class="rgroup-label">Portapapeles / Flujo</span>
+      <span class="rgroup-label">Portapapeles</span>
     </div>
     <div class="rsep"></div>
     <div class="rgroup-wrap">
@@ -167,16 +164,20 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
           <option selected>12</option><option>14</option><option>16</option>
           <option>18</option><option>20</option><option>24</option>
         </select>
-<div class="paste-zone" id="pasteZone">
-  <label>Pega tu escrito aquí — Se distribuye manteniendo negritas, subrayados y formato original</label>
-  <!-- Cambiado a contenteditable para capturar texto enriquecido -->
-  <div id="txtInput" contenteditable="true" placeholder="Presiona Ctrl+V para pegar tu texto con formato..." style="width: 100%; height: 150px; border: 1px solid #ddd; border-radius: 4px; padding: .5rem; font-family: 'Times New Roman', serif; font-size: 12pt; overflow-y: auto; background: #fff; outline: none; text-align: left;"></div>
-  <div class="paste-actions">
-    <button class="rb primary" style="height:30px;font-size:.82rem" onclick="procesarTextoEnriquecido()">&#10004; Distribuir en plantilla</button>
-    <button class="rb danger"  style="height:30px;font-size:.82rem" onclick="togglePaste()">Cancelar</button>
-    <span style="font-size:.72rem;color:#888;font-family:Arial,sans-serif">26 renglones por página · Respeta formato de Word/PDF</span>
-  </div>
-</div>
+      </div>
+      <span class="rgroup-label">Fuente</span>
+    </div>
+    <div class="rsep"></div>
+    <div class="rgroup-wrap">
+      <div class="rgroup">
+        <button class="rb rb-b" id="btn-bold"   onclick="fmt('bold')"      title="Negrita Ctrl+B">N</button>
+        <button class="rb rb-i" id="btn-italic" onclick="fmt('italic')"    title="Cursiva Ctrl+I">K</button>
+        <button class="rb rb-u" id="btn-under"  onclick="fmt('underline')" title="Subrayado Ctrl+U">S</button>
+        <div class="color-wrap" title="Color de texto">
+          <input class="color-inp" type="color" id="colorText" value="#000000" onchange="aplicarColor()">
+          <div class="color-bar" id="colorBar" style="background:#000"></div>
+        </div>
+      </div>
       <span class="rgroup-label">Formato</span>
     </div>
     <div class="rsep"></div>
@@ -187,32 +188,34 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
         <button class="rb" id="btn-der" onclick="alinear('der')"  title="Derecha">&#8677;</button>
         <button class="rb active" id="btn-jus" onclick="alinear('jus')" title="Justificar">&#8660;</button>
       </div>
-      <span class="rgroup-label">Parrafo</span>
+      <span class="rgroup-label">Párrafo</span>
     </div>
     <div class="rsep"></div>
     <div class="rgroup-wrap">
       <div class="rgroup">
-        <button class="rb danger" onclick="limpiarTodo()">&#128465; Limpiar</button>
+        <button class="rb danger" onclick="limpiarTodo()">&#128465; Limpiar Todo</button>
       </div>
       <span class="rgroup-label">Editar</span>
     </div>
   </div>
+
   <div class="ribbon-panel" id="tab-insertar">
     <div class="rgroup-wrap">
       <div class="rgroup">
-        <button class="rb primary" onclick="agregarPagina()">+ Agregar pagina</button>
-        <button class="rb" onclick="eliminarUltimaPagina()">&#8722; Quitar ultima</button>
+        <button class="rb primary" onclick="agregarPagina()">+ Agregar página</button>
+        <button class="rb" onclick="eliminarUltimaPagina()">&#8722; Quitar última</button>
       </div>
-      <span class="rgroup-label">Paginas</span>
+      <span class="rgroup-label">Páginas</span>
     </div>
     <div class="rsep"></div>
     <div class="rgroup-wrap">
       <div class="rgroup">
-        <button class="rb" onclick="insertarLineaEnBlanco()" title="Insertar linea en blanco en posicion actual">&#9135; Linea en blanco</button>
+        <button class="rb" onclick="insertarLineaEnBlanco()" title="Insertar línea en blanco en posición actual">&#9135; Línea en blanco</button>
       </div>
       <span class="rgroup-label">Insertar</span>
     </div>
   </div>
+
   <div class="ribbon-panel" id="tab-vista">
     <div class="rgroup-wrap">
       <div class="rgroup">
@@ -226,8 +229,8 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
     <div class="rsep"></div>
     <div class="rgroup-wrap">
       <div class="rgroup">
-        <button class="rb" onclick="toggleNumeros()" id="btnNums">&#35; Numeros</button>
-        <button class="rb" onclick="toggleLineas()" id="btnLineas">&#9135; Lineas</button>
+        <button class="rb" onclick="toggleNumeros()" id="btnNums">&#35; Números</button>
+        <button class="rb" onclick="toggleLineas()" id="btnLineas">&#9135; Líneas</button>
         <button class="rb active" onclick="toggleGuias()" id="btnGuias">📐 Guías</button>
       </div>
       <span class="rgroup-label">Mostrar</span>
@@ -237,9 +240,10 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
       <div class="rgroup">
         <button class="rb" onclick="toggleFind()">&#128269; Buscar</button>
       </div>
-      <span class="rgroup-label">Buscar</span>
+      <span class="rgroup-label">Búsqueda</span>
     </div>
   </div>
+
   <div class="ribbon-panel" id="tab-archivo">
     <div class="rgroup-wrap">
       <div class="rgroup">
@@ -253,26 +257,21 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
     </div>
     <div class="rsep"></div>
     <div class="rgroup-wrap">
-      <div class="rgroup" style="flex-direction:column;align-items:flex-start;gap:4px">
-        <div style="display:flex;align-items:center;gap:4px">
-          <input type="text" id="pdfName"
-            placeholder="Nombre del PDF (opcional)"
-            style="height:26px;width:210px;border:1px solid #c8b898;border-radius:3px;padding:0 8px;font-family:Arial,sans-serif;font-size:.78rem;outline:none"
-            onfocus="this.style.borderColor='#1a2744'" onblur="this.style.borderColor='#c8b898'">
-          <button class="rb gold" onclick="imprimirPDF()" title="Imprimir o guardar como PDF">&#128424; PDF</button>
-        </div>
+      <div class="rgroup" style="flex-direction:row;align-items:center;gap:4px">
+        <input type="text" id="pdfName" placeholder="Nombre del PDF (opcional)" style="height:26px;width:180px;border:1px solid #c8b898;border-radius:3px;padding:0 8px;font-family:Arial,sans-serif;font-size:.78rem;outline:none">
+        <button class="rb gold" onclick="imprimirPDF()" title="Imprimir o guardar como PDF">&#128424; Exportar PDF</button>
       </div>
-      <span class="rgroup-label">Exportar PDF</span>
+      <span class="rgroup-label">Exportar</span>
     </div>
   </div>
 </div>
 
 <div class="status-bar">
-  <span id="stPages">Paginas: 1</span>
+  <span id="stPages">Páginas: 1</span>
   <span id="stLines">Renglones: 0</span>
-  <span id="stPos">Posicion: &mdash;</span>
+  <span id="stPos">Posición: &mdash;</span>
   <div class="pagnav">
-    Ir a pagina:
+    Ir a página:
     <input type="number" id="goPage" min="1" value="1" onchange="irAPagina(this.value)">
     <button class="rb" style="height:20px;font-size:.7rem" onclick="irAPagina(document.getElementById('goPage').value)">Ir</button>
   </div>
@@ -284,13 +283,12 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
 </div>
 
 <div class="paste-zone" id="pasteZone">
-  <label>Pega tu escrito aquí — Se distribuye manteniendo negritas, subrayados y el formato original</label>
-  <!-- Cambiado a un contenedor contenteditable para admitir Rich Text de Word/PDF -->
-  <div id="txtInput" contenteditable="true" placeholder="Presiona Ctrl+V para pegar..." style="width: 100%; height: 120px; border: 1px solid #ddd; border-radius: 4px; padding: .5rem; font-family: 'Times New Roman', serif; font-size: 12pt; overflow-y: auto; background: #fff; outline: none; text-align: left;"></div>
+  <label>Pega tu escrito aquí — Se distribuye manteniendo negritas, subrayados y cursivas</label>
+  <div id="txtInput" contenteditable="true" placeholder="Presiona Ctrl+V para pegar tu texto aquí..." style="width: 100%; height: 140px; border: 1px solid #ddd; border-radius: 4px; padding: .5rem; font-family: 'Times New Roman', serif; font-size: 12pt; overflow-y: auto; background: #fff; outline: none; text-align: left;"></div>
   <div class="paste-actions">
     <button class="rb primary" style="height:30px;font-size:.82rem" onclick="procesarTextoEnriquecido()">&#10004; Distribuir en plantilla</button>
     <button class="rb danger"  style="height:30px;font-size:.82rem" onclick="togglePaste()">Cancelar</button>
-    <span style="font-size:.72rem;color:#888;font-family:Arial,sans-serif">26 renglones por página · Respeta formatos</span>
+    <span style="font-size:.72rem;color:#888;font-family:Arial,sans-serif">26 renglones elásticos · Respeta formatos de origen</span>
   </div>
 </div>
 
@@ -309,7 +307,7 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
 
 <script>
 var LINES = 26, MAX_PAGES = 40, MAX_LINES = 26 * 40, CW = 558;
-var lastFocused = null; // ultimo renglon con foco
+var lastFocused = null;
 var zoom = 100, showNums = true, showLines = true, showGuias = true;
 var focusedP = 0, focusedL = 0;
 var findMatches = [], findIdx = -1;
@@ -322,7 +320,7 @@ function getCtx() {
 function actualizarCtxFont() {
   var fontName = document.getElementById('selFont').value || 'Times New Roman';
   var fontSizePt = parseInt(document.getElementById('selSize').value) || 12;
-  var fontSizePx = fontSizePt * 1.3333; // 1pt = 1.3333px
+  var fontSizePx = fontSizePt * 1.3333;
   getCtx().font = fontSizePx + 'px "' + fontName + '"';
 }
 function mw(t) {
@@ -331,18 +329,17 @@ function mw(t) {
 }
 function verificarDesborde(el) {
   if (!el) return;
-  // Extrae el texto plano para medir el ancho real en pixeles sin que las etiquetas HTML sumen longitud
   var text = el.textContent || "";
   if (mw(text) > CW) {
     el.classList.add('overflow-warn');
-    el.title = "El texto supera el ancho permitido del renglón y se cortará.";
+    el.title = "El texto supera el ancho permitido del renglón.";
   } else {
     el.classList.remove('overflow-warn');
     el.title = "";
   }
 }
 
-// NUEVA FUNCIÓN: Procesa el contenido elásticamente manteniendo negritas, cursivas y subrayados
+// ── PROCESAMIENTO ELÁSTICO CON CONSERVACIÓN DE FORMATO (RICH TEXT) ──
 function procesarTextoEnriquecido() {
   var zonaPegado = document.getElementById('txtInput');
   if (!zonaPegado || zonaPegado.innerHTML.trim() === "") { alert('No hay texto para distribuir.'); return; }
@@ -350,27 +347,27 @@ function procesarTextoEnriquecido() {
   actualizarCtxFont();
   var lines = [];
   
-  // Separamos el contenido por bloques de párrafo respetando las etiquetas HTML de Word/Web
-  var bloques = zonaPegado.innerHTML.split(/<p[^>]*>|<div[^>]*>|<br\s*\/?>/i);
+  // Segmentación por bloques de párrafo conservando etiquetas internas
+  var encodingDiv = document.createElement('div');
+  encodingDiv.innerHTML = zonaPegado.innerHTML;
+  var bloques = encodingDiv.innerHTML.split(/<p[^>]*>|<div[^>]*>|<br\s*\/?>/i);
   
   bloques.forEach(function(b) {
     var parrafoHtml = b.replace(/<\/p>|<\/div>/i, '').trim();
     if (parrafoHtml === "") return;
 
-    // Tokenizamos por palabras pero manteniendo sus etiquetas de formato pegadas (ej: "<b>el</b>", "<u>demandado</u>")
-    // El uso de espacios (\s+) como captura nos permite conservar la estructura exacta
+    // Tokenizador elástico por palabras manteniendo estructuras de estilo pegadas (ej: <b>texto</b>)
     var componentes = parrafoHtml.split(/(\s+)/);
     var lineaActual = "";
 
     componentes.forEach(function(comp) {
       var testLinea = lineaActual + comp;
-      // Para calcular el desborde real en el canvas, removemos temporalmente las etiquetas HTML por regex
+      // Medición en texto plano removiendo etiquetas HTML transitoriamente
       var textoPlanoTest = testLinea.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ');
       
       if (mw(textoPlanoTest) <= CW) {
         lineaActual = testLinea;
       } else {
-        // Si la palabra empuja la línea fuera del margen, cerramos el renglón actual y bajamos la palabra completa
         if (lineaActual.trim() !== "") {
           lines.push({ html: lineaActual, izq: false });
         }
@@ -378,58 +375,23 @@ function procesarTextoEnriquecido() {
       }
     });
 
-    // Añadimos el último renglón remanente del párrafo (alineado por defecto a la izquierda)
     if (lineaActual.trim() !== "") {
       lines.push({ html: lineaActual, izq: true });
     }
+    // Renglón de respiro técnico estructural entre párrafos judiciales
+    lines.push({ html: "", izq: true });
   });
 
-  // Renderiza las páginas con el nuevo array de líneas enriquecidas
+  if (lines.length >= MAX_LINES) {
+    lines = lines.slice(0, MAX_LINES);
+    alert('Texto excede el límite impuesto de 40 páginas judiciales.');
+  }
+
   renderPages(lines);
   togglePaste();
-  zonaPegado.innerHTML = ""; // Resetea el cuadro de pegado
+  zonaPegado.innerHTML = "";
 }
 
-// Modificamos el listener automático para que reaccione al evento de pegado de manera limpia
-document.getElementById('txtInput').addEventListener('paste', function() { 
-  setTimeout(procesarTextoEnriquecido, 300); 
-});
-// ── Medir y dividir texto ─────────────────────────────────────────────
-function wrapPara(para) {
-  if (!para.trim()) return [{ text: '', izq: true }];
-  var words = para.split(' '), lines = [], line = '';
-  for (var i = 0; i < words.length; i++) {
-    var w = words[i], test = line ? line + ' ' + w : w;
-    if (mw(test) <= CW) { line = test; }
-    else {
-      if (line) lines.push({ text: line, izq: false });
-      if (mw(w) > CW) {
-        var sub = '';
-        for (var k = 0; k < w.length; k++) {
-          if (mw(sub + w[k]) <= CW) sub += w[k];
-          else { lines.push({ text: sub, izq: false }); sub = w[k]; }
-        }
-        line = sub;
-      } else line = w;
-    }
-  }
-  if (line !== '') lines.push({ text: line, izq: false });
-  return lines.length ? lines : [{ text: '', izq: true }];
-}
-
-function textToLines(raw) {
-  var paras = raw.split(/\r?\n/), all = [];
-  for (var i = 0; i < paras.length; i++) {
-    var ws = wrapPara(paras[i]);
-    for (var j = 0; j < ws.length; j++) {
-      all.push(ws[j]);
-      if (all.length >= MAX_LINES) return all;
-    }
-  }
-  return all;
-}
-
-// ── Subir texto al borrar renglón vacío ───────────────────────────────
 function shiftLinesUp(startP, startL) {
   var wrap = document.getElementById('pagesWrap');
   var totalPages = wrap.querySelectorAll('.page').length;
@@ -457,7 +419,6 @@ function shiftLinesUp(startP, startL) {
   }
 }
 
-// ── Crear renglón editable ────────────────────────────────────────────
 function crearRenglon(pageNum, lineNum, lineObj) {
   var row = document.createElement('div'); row.className = 'renglon';
   var num = document.createElement('div'); num.className = 'rn'; num.textContent = lineNum;
@@ -477,14 +438,11 @@ function crearRenglon(pageNum, lineNum, lineObj) {
   txt.setAttribute('data-l', lineNum);
   
   txt.addEventListener('focus', function() {
-    lastFocused = txt;
-    focusedP = pageNum; focusedL = lineNum;
-    document.getElementById('stPos').textContent = 'Pag. ' + pageNum + ' / Rengl. ' + lineNum;
+    lastFocused = txt; focusedP = pageNum; focusedL = lineNum;
+    document.getElementById('stPos').textContent = 'Pág. ' + pageNum + ' / Rengl. ' + lineNum;
     sincronizarFormato();
   });
-  txt.addEventListener('input', function() {
-    verificarDesborde(txt);
-  });
+  txt.addEventListener('input', function() { verificarDesborde(txt); });
   txt.addEventListener('keydown', function(ev) {
     if (ev.key === 'Enter') {
       ev.preventDefault();
@@ -519,7 +477,6 @@ function goLine(p, l) {
   try { var r = document.createRange(); r.selectNodeContents(el); r.collapse(false); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); } catch(e) {}
 }
 
-// ── Renderizar páginas ────────────────────────────────────────────────
 function renderPages(lines) {
   var wrap = document.getElementById('pagesWrap'); wrap.innerHTML = '';
   var pages = Math.min(Math.max(1, Math.ceil(lines.length / LINES)), MAX_PAGES);
@@ -535,12 +492,11 @@ function renderPages(lines) {
     var hj = document.createElement('div'); hj.className = 'hoja'; hj.textContent = 'Hoja '+p;
     pe.appendChild(ct); pe.appendChild(hj); wrap.appendChild(pe);
   }
-  document.getElementById('stPages').textContent = 'Paginas: ' + pages;
+  document.getElementById('stPages').textContent = 'Páginas: ' + pages;
   document.getElementById('stLines').textContent = 'Renglones: ' + lines.length;
   document.getElementById('goPage').max = pages;
 }
 
-// ── Tabs ──────────────────────────────────────────────────────────────
 function showTab(ev, id) {
   document.querySelectorAll('.ribbon-panel').forEach(function(p){ p.classList.remove('active'); });
   document.querySelectorAll('.rtab').forEach(function(t){ t.classList.remove('active'); });
@@ -548,27 +504,14 @@ function showTab(ev, id) {
   ev.target.classList.add('active');
 }
 
-// ── Pegar texto ───────────────────────────────────────────────────────
 function togglePaste() {
   var z = document.getElementById('pasteZone');
   if (z.classList.contains('visible')) z.classList.remove('visible');
   else { z.classList.add('visible'); document.getElementById('txtInput').focus(); }
 }
-function procesarTexto() {
-  var raw = document.getElementById('txtInput').value;
-  if (!raw.trim()) { alert('No hay texto.'); return; }
-  actualizarCtxFont();
-  var paras = raw.split(/\r?\n/).map(function(p) {
-    return { text: p, align: 'jus' };
-  });
-  var lines = paragraphsToLines(paras);
-  renderPages(lines);
-  togglePaste();
-  if (lines.length >= MAX_LINES) alert('Texto excede 40 paginas. Se muestran los primeros 1040 renglones.');
-}
-document.getElementById('txtInput').addEventListener('paste', function(){ setTimeout(procesarTexto, 300); });
 
-// ── Formato ───────────────────────────────────────────────────────────
+document.getElementById('txtInput').addEventListener('paste', function(){ setTimeout(procesarTextoEnriquecido, 300); });
+
 function fmt(cmd) {
   if (lastFocused) lastFocused.focus();
   document.execCommand(cmd, false, null);
@@ -578,26 +521,18 @@ function aplicarFuente() {
   var fontName = document.getElementById('selFont').value;
   var wrap = document.getElementById('pagesWrap');
   if (wrap) wrap.style.fontFamily = fontName;
-  document.querySelectorAll('.rt').forEach(function(el) {
-    el.style.fontFamily = fontName;
-  });
+  document.querySelectorAll('.rt').forEach(function(el) { el.style.fontFamily = fontName; });
   actualizarCtxFont();
-  if (document.querySelectorAll('.rt').length > 0) {
-    reajustarTexto(true);
-  }
+  if (document.querySelectorAll('.rt').length > 0) { reajustarTexto(true); }
 }
 function aplicarTamano() {
   var s = document.getElementById('selSize').value;
   var size = s + 'pt';
   var wrap = document.getElementById('pagesWrap');
   if (wrap) wrap.style.fontSize = size;
-  document.querySelectorAll('.rt').forEach(function(el) {
-    el.style.fontSize = size;
-  });
+  document.querySelectorAll('.rt').forEach(function(el) { el.style.fontSize = size; });
   actualizarCtxFont();
-  if (document.querySelectorAll('.rt').length > 0) {
-    reajustarTexto(true);
-  }
+  if (document.querySelectorAll('.rt').length > 0) { reajustarTexto(true); }
 }
 function aplicarColor() {
   var c = document.getElementById('colorText').value;
@@ -620,7 +555,6 @@ function sincronizarFormato() {
   var u = document.getElementById('btn-under');  if(u) u.classList.toggle('active', document.queryCommandState('underline'));
 }
 
-// ── Zoom ──────────────────────────────────────────────────────────────
 function setZoom(v) {
   zoom = parseInt(v);
   document.getElementById('zoomSlider').value = v; document.getElementById('zoomSlider2').value = v;
@@ -629,7 +563,6 @@ function setZoom(v) {
 }
 function cambiarZoom(d) { setZoom(Math.min(130, Math.max(50, zoom+d))); }
 
-// ── Mostrar/ocultar ───────────────────────────────────────────────────
 function toggleNumeros() {
   showNums = !showNums;
   document.querySelectorAll('.rn').forEach(function(n){ n.style.visibility = showNums ? 'visible' : 'hidden'; });
@@ -640,13 +573,11 @@ function toggleLineas() {
   document.querySelectorAll('.renglon').forEach(function(r){ r.style.borderBottom = showLines ? '1px solid #d0d0d0' : 'none'; });
 }
 
-// ── Navegación ────────────────────────────────────────────────────────
 function irAPagina(n) {
   var pg = document.getElementById('pag-'+n);
   if (pg) pg.scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
-// ── Buscar ────────────────────────────────────────────────────────────
 function toggleFind() {
   var fb = document.getElementById('findBar');
   if (fb.classList.contains('visible')) { fb.classList.remove('visible'); limpiarHL(); }
@@ -674,11 +605,10 @@ function limpiarHL() {
   document.querySelectorAll('.hl-find').forEach(function(h){ var p=h.parentNode; p.replaceChild(document.createTextNode(h.textContent),h); p.normalize(); });
 }
 
-// ── Páginas dinámicas ─────────────────────────────────────────────────
 function agregarPagina() {
   var wrap = document.getElementById('pagesWrap');
   var n = wrap.querySelectorAll('.page').length;
-  if (n >= MAX_PAGES) { alert('Maximo 40 paginas.'); return; }
+  if (n >= MAX_PAGES) { alert('Máximo 40 páginas habilitadas.'); return; }
   var p = n + 1;
   var pe = document.createElement('div'); pe.className = showGuias ? 'page show-guides' : 'page'; pe.id='pag-'+p;
   pe.style.transform = 'scale('+(zoom/100)+')'; pe.style.marginBottom=((zoom-100)*12.1)+'px';
@@ -686,22 +616,23 @@ function agregarPagina() {
   for (var l=1; l<=LINES; l++) ct.appendChild(crearRenglon(p, l, {text:'', izq:true}));
   var hj = document.createElement('div'); hj.className='hoja'; hj.textContent='Hoja '+p;
   pe.appendChild(ct); pe.appendChild(hj); wrap.appendChild(pe);
-  document.getElementById('stPages').textContent = 'Paginas: '+p;
+  document.getElementById('stPages').textContent = 'Páginas: '+p;
   document.getElementById('goPage').max = p;
   pe.scrollIntoView({behavior:'smooth'});
 }
+幕
 function eliminarUltimaPagina() {
   var wrap = document.getElementById('pagesWrap');
   var pages = wrap.querySelectorAll('.page');
-  if (pages.length <= 1) { alert('Debe quedar al menos una pagina.'); return; }
-  if (!confirm('Eliminar la ultima pagina?')) return;
+  if (pages.length <= 1) { alert('Debe quedar al menos una página activa.'); return; }
+  if (!confirm('¿Eliminar la última página?')) return;
   pages[pages.length-1].remove();
   var n = wrap.querySelectorAll('.page').length;
-  document.getElementById('stPages').textContent = 'Paginas: '+n;
+  document.getElementById('stPages').textContent = 'Páginas: '+n;
   document.getElementById('goPage').max = n;
 }
 function insertarLineaEnBlanco() {
-  if (!focusedP) { alert('Hace clic en un renglon primero.'); return; }
+  if (!focusedP) { alert('Hace clic en un renglón primero.'); return; }
   for (var i=LINES; i>focusedL; i--) {
     var src = document.querySelector('[data-p="'+focusedP+'"][data-l="'+(i-1)+'"]');
     var dst = document.querySelector('[data-p="'+focusedP+'"][data-l="'+i+'"]');
@@ -711,18 +642,17 @@ function insertarLineaEnBlanco() {
   if (cur) { cur.innerHTML=''; cur.className='rt izq'; cur.focus(); }
 }
 
-// ── Guardar / Cargar ──────────────────────────────────────────────────
 function guardarLocal() {
   var data = [];
   document.querySelectorAll('.rt').forEach(function(el){ data.push({p:el.dataset.p, l:el.dataset.l, html:el.innerHTML, cls:el.className}); });
-  try { localStorage.setItem('pj_data', JSON.stringify(data)); alert('Guardado correctamente.'); }
+  try { localStorage.setItem('pj_data', JSON.stringify(data)); alert('Guardado correctamente en navegador.'); }
   catch(e) { alert('Error: '+e.message); }
 }
 function cargarLocal() {
   try {
     var raw = localStorage.getItem('pj_data');
     if (!raw) { alert('No hay datos guardados.'); return; }
-    if (!confirm('Esto reemplaza el contenido actual. Continuar?')) return;
+    if (!confirm('Esto reemplaza el contenido actual. ¿Continuar?')) return;
     var data = JSON.parse(raw);
     var maxP = 1;
     data.forEach(function(d){ if (parseInt(d.p)>maxP) maxP=parseInt(d.p); });
@@ -732,28 +662,22 @@ function cargarLocal() {
       var el = document.querySelector('[data-p="'+d.p+'"][data-l="'+d.l+'"]');
       if (el) { el.innerHTML=d.html; el.className=d.cls; }
     });
-    alert('Contenido recuperado.');
+    alert('Contenido recuperado con éxito.');
   } catch(e) { alert('Error: '+e.message); }
 }
 
-// ── Limpiar ───────────────────────────────────────────────────────────
 function limpiarTodo() {
-  if (!confirm('Borrar todo el contenido?')) return;
+  if (!confirm('¿Borrar por completo todo el contenido de la plantilla?')) return;
   renderPages([]);
 }
 
-// ── Atajos globales ───────────────────────────────────────────────────
 document.addEventListener('keydown', function(ev) {
-  // Ctrl+F = buscar
   if ((ev.ctrlKey||ev.metaKey) && ev.key==='f') { ev.preventDefault(); toggleFind(); }
-  // Escape = cerrar buscar
   if (ev.key==='Escape') { var fb=document.getElementById('findBar'); if(fb.classList.contains('visible')) toggleFind(); }
 
-  // Suprimir o Retroceso en renglon vacio = subir texto
   if (ev.key==='Backspace' || ev.key==='Delete') {
     var el = document.activeElement;
     if (el && el.getAttribute && el.getAttribute('data-p')) {
-      // Quitar <br> y espacios para verificar si esta realmente vacio
       var contenido = el.innerHTML.replace(/<br>/gi,'').replace(/<br\/>/gi,'').replace(/&nbsp;/gi,'').trim();
       var textoVacio = el.textContent.replace(/\u00a0/g,'').trim() === '';
       if (contenido === '' || textoVacio) {
@@ -766,27 +690,21 @@ document.addEventListener('keydown', function(ev) {
   }
 });
 
-// ── Imprimir con nombre personalizado ────────────────────────────────
 function imprimirPDF() {
   var nombre = document.getElementById('pdfName').value.trim();
   if (nombre) {
-    // Cambiar el título del documento temporalmente → el navegador lo usa como nombre del PDF
     var tituloOriginal = document.title;
     document.title = nombre;
     window.print();
-    // Restaurar título después de imprimir
     setTimeout(function() { document.title = tituloOriginal; }, 2000);
   } else {
     window.print();
   }
 }
 
-// ── Guías, Reflow e Importación/Exportación ───────────────────────────
 function toggleGuias() {
   showGuias = !showGuias;
-  document.querySelectorAll('.page').forEach(function(p){
-    p.classList.toggle('show-guides', showGuias);
-  });
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.toggle('show-guides', showGuias); });
   var btn = document.getElementById('btnGuias');
   if (btn) btn.classList.toggle('active', showGuias);
 }
@@ -805,31 +723,19 @@ function obtenerTextoDocumento() {
     var isBreak = isIzq || isCen || isDer || textTrimmed === "";
     
     if (textTrimmed === "") {
-      if (currentPara !== "") {
-        paragraphs.push({ text: currentPara, align: 'jus' });
-        currentPara = "";
-      }
+      if (currentPara !== "") { paragraphs.push({ text: currentPara, align: 'jus' }); currentPara = ""; }
       paragraphs.push({ text: "", align: 'izq' });
     } else {
-      if (currentPara === "") {
-        currentPara = textTrimmed;
-      } else {
-        currentPara += " " + textTrimmed;
-      }
+      if (currentPara === "") { currentPara = textTrimmed; } else { currentPara += " " + textTrimmed; }
       if (isBreak) {
         var align = 'jus';
-        if (isCen) align = 'cen';
-        else if (isDer) align = 'der';
-        else if (isIzq) align = 'izq';
-        
+        if (isCen) align = 'cen'; else if (isDer) align = 'der'; else if (isIzq) align = 'izq';
         paragraphs.push({ text: currentPara, align: align });
         currentPara = "";
       }
     }
   }
-  if (currentPara !== "") {
-    paragraphs.push({ text: currentPara, align: 'jus' });
-  }
+  if (currentPara !== "") { paragraphs.push({ text: currentPara, align: 'jus' }); }
   return paragraphs;
 }
 
@@ -842,16 +748,27 @@ function paragraphsToLines(paras) {
       if (all.length >= MAX_LINES) return all;
       continue;
     }
-    var ws = wrapPara(pObj.text);
-    for (var j = 0; j < ws.length; j++) {
-      var isLastLine = (j === ws.length - 1);
-      var lineAlign = pObj.align;
-      if (pObj.align === 'jus') {
-        if (isLastLine) lineAlign = 'izq';
-        else lineAlign = 'jus';
+    
+    // Simulación elástica alternativa para compatibilidad del botón reflow
+    var words = pObj.text.split(' '), line = '';
+    var localLines = [];
+    
+    for (var k = 0; k < words.length; k++) {
+      var w = words[k], test = line ? line + ' ' + w : w;
+      if (mw(test) <= CW) { line = test; }
+      else {
+        if (line) localLines.push(line);
+        line = w;
       }
+    }
+    if (line !== '') localLines.push(line);
+
+    for (var j = 0; j < localLines.length; j++) {
+      var isLastLine = (j === localLines.length - 1);
+      var lineAlign = pObj.align;
+      if (pObj.align === 'jus' && isLastLine) lineAlign = 'izq';
       all.push({
-        text: ws[j].text,
+        text: localLines[j],
         izq: (lineAlign === 'izq'),
         cen: (lineAlign === 'cen'),
         der: (lineAlign === 'der'),
@@ -865,106 +782,62 @@ function paragraphsToLines(paras) {
 
 function reajustarTexto(silent) {
   var paras = obtenerTextoDocumento();
-  while (paras.length > 0 && paras[paras.length - 1].text.trim() === "" && paras.length > 1) {
-    paras.pop();
-  }
+  while (paras.length > 0 && paras[paras.length - 1].text.trim() === "" && paras.length > 1) { paras.pop(); }
   var hasContent = paras.some(function(p) { return p.text.trim() !== ""; });
-  if (!hasContent) {
-    if (!silent) alert("No hay texto para reajustar.");
-    return;
-  }
+  if (!hasContent) { if (!silent) alert("No hay texto para reajustar."); return; }
   actualizarCtxFont();
   var lines = paragraphsToLines(paras);
   renderPages(lines);
-  if (!silent) alert("Texto reajustado correctamente con el formato actual.");
+  if (!silent) alert("Texto reajustado correctamente.");
 }
 
 function descargarJSON() {
   var data = {
     fontName: document.getElementById('selFont').value,
     fontSize: document.getElementById('selSize').value,
-    showNums: showNums,
-    showLines: showLines,
-    showGuias: showGuias,
+    showNums: showNums, showLines: showLines, showGuias: showGuias,
     lines: []
   };
   document.querySelectorAll('.rt').forEach(function(el){
-    data.lines.push({
-      p: el.dataset.p,
-      l: el.dataset.l,
-      html: el.innerHTML,
-      cls: el.className
-    });
+    data.lines.push({ p: el.dataset.p, l: el.dataset.l, html: el.innerHTML, cls: el.className });
   });
   var jsonStr = JSON.stringify(data, null, 2);
   var blob = new Blob([jsonStr], { type: 'application/json' });
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   var name = document.getElementById('pdfName').value.trim() || 'borrador_judicial';
-  a.download = name + '.json';
-  a.href = url;
-  a.click();
-  URL.revokeObjectURL(url);
+  a.download = name + '.json'; a.href = url; a.click(); URL.revokeObjectURL(url);
 }
 
-function subirJSON() {
-  document.getElementById('fileInput').click();
-}
+function subirJSON() { document.getElementById('fileInput').click(); }
 
 function leerJSON(event) {
-  var file = event.target.files[0];
-  if (!file) return;
+  var file = event.target.files[0]; if (!file) return;
   var reader = new FileReader();
   reader.onload = function(e) {
     try {
       var data = JSON.parse(e.target.result);
-      if (!data.lines || !Array.isArray(data.lines)) {
-        alert("Archivo JSON no válido para esta plantilla.");
-        return;
-      }
+      if (!data.lines || !Array.isArray(data.lines)) { alert("Archivo borrador no válido."); return; }
       if (data.fontName) document.getElementById('selFont').value = data.fontName;
       if (data.fontSize) document.getElementById('selSize').value = data.fontSize;
-      if (data.showNums !== undefined) {
-        showNums = data.showNums;
-        document.getElementById('btnNums').classList.toggle('active', showNums);
-      }
-      if (data.showLines !== undefined) {
-        showLines = data.showLines;
-      }
-      if (data.showGuias !== undefined) {
-        showGuias = data.showGuias;
-        var btn = document.getElementById('btnGuias');
-        if (btn) btn.classList.toggle('active', showGuias);
-      }
+      if (data.showNums !== undefined) { showNums = data.showNums; document.getElementById('btnNums').classList.toggle('active', showNums); }
+      if (data.showLines !== undefined) { showLines = data.showLines; }
+      if (data.showGuias !== undefined) { showGuias = data.showGuias; var btn = document.getElementById('btnGuias'); if (btn) btn.classList.toggle('active', showGuias); }
       var maxP = 1;
       data.lines.forEach(function(d){ if (parseInt(d.p) > maxP) maxP = parseInt(d.p); });
-      var emptyLines = [];
-      for (var i = 0; i < maxP * LINES; i++) emptyLines.push({ text: '', izq: true });
+      var emptyLines = []; for (var i = 0; i < maxP * LINES; i++) emptyLines.push({ text: '', izq: true });
       renderPages(emptyLines);
       data.lines.forEach(function(d){
-        var el = document.querySelector('[data-p="'+d.p+'"][data-l="'+d.l+'"]');
-        if (el) {
-          el.innerHTML = d.html;
-          el.className = d.cls;
-          if (el.textContent) verificarDesborde(el);
-        }
+        var el = document.querySelector('[data-p=\"'+d.p+'\"][data-l=\"'+d.l+'\"]');
+        if (el) { el.innerHTML = d.html; el.className = d.cls; if (el.textContent) verificarDesborde(el); }
       });
-      var wrap = document.getElementById('pagesWrap');
-      if (wrap) {
-        wrap.style.fontFamily = data.fontName || 'Times New Roman';
-        wrap.style.fontSize = (data.fontSize || 12) + 'pt';
-      }
-      actualizarCtxFont();
-      event.target.value = '';
-      alert("Borrador cargado correctamente.");
-    } catch(err) {
-      alert("Error al procesar el archivo: " + err.message);
-    }
+      var wrap = document.getElementById('pagesWrap'); if (wrap) { wrap.style.fontFamily = data.fontName || 'Times New Roman'; wrap.style.fontSize = (data.fontSize || 12) + 'pt'; }
+      actualizarCtxFont(); event.target.value = ''; alert("Borrador recuperado.");
+    } catch(err) { alert("Error al procesar: " + err.message); }
   };
   reader.readAsText(file);
 }
 
-// ── Init ──────────────────────────────────────────────────────────────
 actualizarCtxFont();
 renderPages([]);
 </script>

@@ -119,12 +119,24 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
 </head>
 <body>
 
-<div class="title-bar">
-  <span class="logo">&#9878;</span>
-  <span class="doc-name">Plantilla Judicial &mdash; 26 Renglones &middot; Papel Legal 8.5&quot;&times;14&quot;</span>
-  <span class="hint">Clic en un renglon para editar &middot; Tab = siguiente &middot; Suprimir en renglon vacio = sube el texto</span>
-</div>
+<div class="title-bar" style="display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #111b30 0%, #1a2744 100%); color: #ffffff; padding: .6rem 1.2rem; font-family: 'Segoe UI', Arial, sans-serif; font-size: .8rem; box-shadow: inset 0 -1px 0 rgba(255,255,255,0.1); border-bottom: 1px solid #0d1526;">
+    
+    <div class="doc-name" style="font-weight: 600; letter-spacing: .03em; flex: 1; display: flex; align-items: center; gap: 6px;">
+        <span class="logo" style="font-size: 1.1rem; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));">⚖️</span> 
+        <span style="color: #ffffff;">Plantilla Judicial</span>
+        <span style="background: rgba(255,255,255,0.15); padding: 1px 6px; border-radius: 3px; font-size: .65rem; font-weight: 400; color: #d1dbed; margin-left: 4px;">v2.0</span>
+    </div>
+    
+    <div style="text-align: center; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2;">
+        <span style="font-size: .85rem; font-weight: 600; letter-spacing: .05em; color: #ffffff; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">PREDICTA</span>
+        <span style="font-size: .68rem; font-weight: 400; color: #a4b3cf; letter-spacing: .02em; margin-top: 1px;">Dra. María Florencia Suarez</span>
+    </div>
+    
+    <div class="hint" style="font-size: .72rem; color: #8a9fc0; flex: 1; text-align: right; font-weight: 500; letter-spacing: .02em;">
+        Regulación 26 Renglones · <span style="color: #cbdcf7;">Santa Fe</span>
+    </div>
 
+</div>
 <div class="ribbon">
   <div class="ribbon-tabs">
     <button class="rtab active" onclick="showTab(event,'inicio')">Inicio</button>

@@ -155,20 +155,16 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
           <option selected>12</option><option>14</option><option>16</option>
           <option>18</option><option>20</option><option>24</option>
         </select>
-      </div>
-      <span class="rgroup-label">Fuente</span>
-    </div>
-    <div class="rsep"></div>
-    <div class="rgroup-wrap">
-      <div class="rgroup">
-        <button class="rb rb-b" id="btn-bold"   onclick="fmt('bold')"      title="Negrita Ctrl+B">N</button>
-        <button class="rb rb-i" id="btn-italic" onclick="fmt('italic')"    title="Cursiva Ctrl+I">K</button>
-        <button class="rb rb-u" id="btn-under"  onclick="fmt('underline')" title="Subrayado Ctrl+U">S</button>
-        <div class="color-wrap" title="Color de texto">
-          <input class="color-inp" type="color" id="colorText" value="#000000" onchange="aplicarColor()">
-          <div class="color-bar" id="colorBar" style="background:#000"></div>
-        </div>
-      </div>
+<div class="paste-zone" id="pasteZone">
+  <label>Pega tu escrito aquí — Se distribuye manteniendo negritas, subrayados y formato original</label>
+  <!-- Cambiado a contenteditable para capturar texto enriquecido -->
+  <div id="txtInput" contenteditable="true" placeholder="Presiona Ctrl+V para pegar tu texto con formato..." style="width: 100%; height: 150px; border: 1px solid #ddd; border-radius: 4px; padding: .5rem; font-family: 'Times New Roman', serif; font-size: 12pt; overflow-y: auto; background: #fff; outline: none; text-align: left;"></div>
+  <div class="paste-actions">
+    <button class="rb primary" style="height:30px;font-size:.82rem" onclick="procesarTextoEnriquecido()">&#10004; Distribuir en plantilla</button>
+    <button class="rb danger"  style="height:30px;font-size:.82rem" onclick="togglePaste()">Cancelar</button>
+    <span style="font-size:.72rem;color:#888;font-family:Arial,sans-serif">26 renglones por página · Respeta formato de Word/PDF</span>
+  </div>
+</div>
       <span class="rgroup-label">Formato</span>
     </div>
     <div class="rsep"></div>
@@ -276,12 +272,13 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
 </div>
 
 <div class="paste-zone" id="pasteZone">
-  <label>Pega todo el texto aqui &mdash; se distribuye automaticamente en todas las paginas</label>
-  <textarea id="txtInput" placeholder="Ctrl+V para pegar..."></textarea>
+  <label>Pega tu escrito aquí — Se distribuye manteniendo negritas, subrayados y el formato original</label>
+  <!-- Cambiado a un contenedor contenteditable para admitir Rich Text de Word/PDF -->
+  <div id="txtInput" contenteditable="true" placeholder="Presiona Ctrl+V para pegar..." style="width: 100%; height: 120px; border: 1px solid #ddd; border-radius: 4px; padding: .5rem; font-family: 'Times New Roman', serif; font-size: 12pt; overflow-y: auto; background: #fff; outline: none; text-align: left;"></div>
   <div class="paste-actions">
-    <button class="rb primary" style="height:30px;font-size:.82rem" onclick="procesarTexto()">&#10004; Distribuir en plantilla</button>
+    <button class="rb primary" style="height:30px;font-size:.82rem" onclick="procesarTextoEnriquecido()">&#10004; Distribuir en plantilla</button>
     <button class="rb danger"  style="height:30px;font-size:.82rem" onclick="togglePaste()">Cancelar</button>
-    <span style="font-size:.72rem;color:#888;font-family:Arial,sans-serif">26 renglones por pagina &middot; hasta 40 paginas</span>
+    <span style="font-size:.72rem;color:#888;font-family:Arial,sans-serif">26 renglones por página · Respeta formatos</span>
   </div>
 </div>
 
@@ -322,6 +319,7 @@ function mw(t) {
 }
 function verificarDesborde(el) {
   if (!el) return;
+  // Extrae el texto plano para medir el ancho real en pixeles sin que las etiquetas HTML sumen longitud
   var text = el.textContent || "";
   if (mw(text) > CW) {
     el.classList.add('overflow-warn');
@@ -332,6 +330,58 @@ function verificarDesborde(el) {
   }
 }
 
+// NUEVA FUNCIÓN: Procesa el contenido elásticamente manteniendo negritas, cursivas y subrayados
+function procesarTextoEnriquecido() {
+  var zonaPegado = document.getElementById('txtInput');
+  if (!zonaPegado || zonaPegado.innerHTML.trim() === "") { alert('No hay texto para distribuir.'); return; }
+
+  actualizarCtxFont();
+  var lines = [];
+  
+  // Separamos el contenido por bloques de párrafo respetando las etiquetas HTML de Word/Web
+  var bloques = zonaPegado.innerHTML.split(/<p[^>]*>|<div[^>]*>|<br\s*\/?>/i);
+  
+  bloques.forEach(function(b) {
+    var parrafoHtml = b.replace(/<\/p>|<\/div>/i, '').trim();
+    if (parrafoHtml === "") return;
+
+    // Tokenizamos por palabras pero manteniendo sus etiquetas de formato pegadas (ej: "<b>el</b>", "<u>demandado</u>")
+    // El uso de espacios (\s+) como captura nos permite conservar la estructura exacta
+    var componentes = parrafoHtml.split(/(\s+)/);
+    var lineaActual = "";
+
+    componentes.forEach(function(comp) {
+      var testLinea = lineaActual + comp;
+      // Para calcular el desborde real en el canvas, removemos temporalmente las etiquetas HTML por regex
+      var textoPlanoTest = testLinea.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ');
+      
+      if (mw(textoPlanoTest) <= CW) {
+        lineaActual = testLinea;
+      } else {
+        // Si la palabra empuja la línea fuera del margen, cerramos el renglón actual y bajamos la palabra completa
+        if (lineaActual.trim() !== "") {
+          lines.push({ html: lineaActual, izq: false });
+        }
+        lineaActual = comp;
+      }
+    });
+
+    // Añadimos el último renglón remanente del párrafo (alineado por defecto a la izquierda)
+    if (lineaActual.trim() !== "") {
+      lines.push({ html: lineaActual, izq: true });
+    }
+  });
+
+  // Renderiza las páginas con el nuevo array de líneas enriquecidas
+  renderPages(lines);
+  togglePaste();
+  zonaPegado.innerHTML = ""; // Resetea el cuadro de pegado
+}
+
+// Modificamos el listener automático para que reaccione al evento de pegado de manera limpia
+document.getElementById('txtInput').addEventListener('paste', function() { 
+  setTimeout(procesarTextoEnriquecido, 300); 
+});
 // ── Medir y dividir texto ─────────────────────────────────────────────
 function wrapPara(para) {
   if (!para.trim()) return [{ text: '', izq: true }];

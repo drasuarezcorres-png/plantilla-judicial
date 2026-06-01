@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Plantilla Judicial — 26 Renglones</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;padding-bottom:2rem}
+.title-bar{background:#1a2744;color:#fff;padding:.45rem 1rem;display:flex;align-items:center;gap:.75rem;font-family:Arial,sans-serif;font-size:.78rem}
+.title-bar .logo{font-size:1rem}
+.title-bar .doc-name{font-weight:600;letter-spacing:.04em;flex:1}
+.title-bar .hint{font-size:.7rem;color:#8a9fc0}
+.ribbon{background:#f0ede8;border-bottom:1px solid #c8b898;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.ribbon-tabs{display:flex;background:#e0dbd4;border-bottom:1px solid #c8b898}
+.rtab{padding:.3rem .9rem;font-size:.75rem;font-family:Arial,sans-serif;cursor:pointer;color:#555;border:none;background:none;border-bottom:2px solid transparent;transition:all .15s}
+.rtab:hover{background:rgba(26,39,68,.07);color:#1a2744}
+.rtab.active{background:#f0ede8;color:#1a2744;font-weight:700;border-bottom:2px solid #1a2744}
+.ribbon-panel{display:none;padding:.4rem .75rem;align-items:center;gap:.25rem;flex-wrap:wrap}
+.ribbon-panel.active{display:flex}
+.rsep{width:1px;height:28px;background:#c8b898;margin:0 .35rem;flex-shrink:0}
+.rgroup{display:flex;align-items:center;gap:.2rem}
+.rgroup-label{font-size:.62rem;color:#888;font-family:Arial,sans-serif;text-align:center;margin-top:.15rem;display:block}
+.rgroup-wrap{display:flex;flex-direction:column;align-items:center}
+.rb{min-width:28px;height:28px;padding:0 6px;border:1px solid transparent;border-radius:3px;background:none;cursor:pointer;font-family:Arial,sans-serif;font-size:.8rem;color:#333;transition:all .12s;display:flex;align-items:center;justify-content:center;gap:3px;white-space:nowrap}
+.rb:hover{background:#ddd8d0;border-color:#c0b8b0}
+.rb.active{background:#c8d8f0;border-color:#6a9cd0;color:#1a2744}
+.rb.primary{background:#1a2744;color:#fff;padding:0 10px}
+.rb.primary:hover{background:#243568}
+.rb.danger{background:#c0392b;color:#fff;padding:0 8px}
+.rb.gold{background:#c8a84b;color:#fff;padding:0 10px}
+.rb.gold:hover{background:#b89640}
+.rb-b{font-weight:700}
+.rb-i{font-style:italic}
+.rb-u{text-decoration:underline}
+.rsel{height:26px;border:1px solid #c8b898;border-radius:3px;background:#fff;font-family:Arial,sans-serif;font-size:.78rem;padding:0 4px;cursor:pointer;color:#333}
+.rsel:focus{outline:none;border-color:#1a2744}
+.color-wrap{position:relative;display:inline-flex;flex-direction:column;align-items:center}
+.color-inp{width:24px;height:20px;border:none;padding:0;cursor:pointer;background:none}
+.color-bar{height:4px;width:20px;border-radius:2px;margin-top:1px;pointer-events:none}
+.paste-zone{background:#fff8e8;border:2px dashed #c8a84b;border-radius:6px;margin:.75rem auto;max-width:860px;padding:.9rem 1.1rem;display:none}
+.paste-zone.visible{display:block}
+.paste-zone label{font-size:.78rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:.4rem;font-family:Arial,sans-serif}
+.paste-zone textarea{width:100%;height:120px;border:1px solid #ddd;border-radius:4px;padding:.5rem;font-family:'Times New Roman',serif;font-size:12pt;resize:vertical;outline:none}
+.paste-actions{display:flex;gap:.5rem;margin-top:.5rem;align-items:center;flex-wrap:wrap}
+.status-bar{background:#e8e4de;border-bottom:1px solid #c8b898;padding:.25rem 1rem;display:flex;align-items:center;gap:1.5rem;font-family:Arial,sans-serif;font-size:.7rem;color:#666;flex-wrap:wrap}
+.status-bar .zoom-ctrl{display:flex;align-items:center;gap:.4rem;margin-left:auto}
+.status-bar .pagnav{display:flex;align-items:center;gap:.3rem}
+.status-bar input[type=number]{width:38px;height:20px;border:1px solid #c8b898;border-radius:3px;text-align:center;font-size:.72rem;font-family:Arial,sans-serif;padding:0 2px}
+.pages-wrap{padding:1rem;display:flex;flex-direction:column;align-items:center;gap:1.2rem}
+.page{width:734px;height:1210px;background:#fff;box-shadow:0 3px 18px rgba(0,0,0,.22);padding:97px 52px 65px 81px;position:relative;flex-shrink:0;transform-origin:top center}
+.page-content{width:100%;height:100%;display:flex;flex-direction:column}
+.renglon{display:flex;align-items:baseline;height:40px;min-height:40px;max-height:40px;border-bottom:1px solid #d0d0d0;overflow:hidden;flex-shrink:0}
+.rn{width:28px;flex-shrink:0;font-size:9pt;color:#bbb;text-align:right;padding-right:6px;user-select:none;line-height:40px}
+.rt{flex:1;font-family:'Times New Roman',serif;font-size:12pt;line-height:40px;text-align:justify;text-align-last:justify;white-space:nowrap;overflow:hidden;padding:0 4px;outline:none;cursor:text;caret-color:#1a2744;border-radius:2px}
+.rt:focus{background:rgba(26,39,68,.04);text-align:left;text-align-last:left;white-space:pre}
+.rt.izq{text-align:left!important;text-align-last:left!important}
+.rt.cen{text-align:center!important;text-align-last:center!important}
+.rt.der{text-align:right!important;text-align-last:right!important}
+.hoja{position:absolute;bottom:22px;right:52px;font-size:9pt;color:#bbb;font-family:Arial,sans-serif}
+.find-bar{display:none;position:fixed;top:120px;right:20px;z-index:200;background:#fff;border:1px solid #c8b898;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.2);padding:.65rem .9rem;font-family:Arial,sans-serif;min-width:280px}
+.find-bar.visible{display:block}
+.find-bar label{font-size:.72rem;font-weight:700;color:#555;display:block;margin-bottom:.3rem}
+.find-bar input{width:100%;height:28px;border:1px solid #c8b898;border-radius:3px;padding:0 8px;font-size:.82rem;outline:none;margin-bottom:.4rem}
+.find-bar input:focus{border-color:#1a2744}
+.find-bar .find-actions{display:flex;gap:.4rem;align-items:center}
+.find-bar .find-info{font-size:.7rem;color:#888;margin-left:auto}
+.hl-find{background:#ffe08a;border-radius:2px}
+.hl-find.current{background:#ff9900;color:#fff}
+/* Guías de margen visuales */
+.page.show-guides::before {
+  content: '';
+  position: absolute;
+  top: 97px;
+  bottom: 65px;
+  left: 81px;
+  right: 52px;
+  border: 1px dashed rgba(26, 39, 68, 0.22);
+  pointer-events: none;
+  z-index: 10;
+}
+.page.show-guides::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 81px;
+  background: rgba(0, 0, 0, 0.025);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+  pointer-events: none;
+  z-index: 9;
+}
+/* Advertencia de desborde */
+.rt.overflow-warn {
+  border-bottom: 2px solid #e74c3c !important;
+  background: rgba(231, 76, 60, 0.04) !important;
+}
+
+@media print{
+  @page{size:8.5in 14in;margin:1.5in 0.75in 1in 1.25in}
+  body{background:none;padding:0}
+  .title-bar,.ribbon,.paste-zone,.status-bar,.find-bar{display:none!important}
+  .pages-wrap{padding:0;gap:0;display:block}
+  .page{width:100%;height:calc(14in - 2.5in);padding:0;box-shadow:none;page-break-after:always;break-after:page;transform:none!important}
+  .page:last-child{page-break-after:avoid;break-after:avoid}
+  .page::before, .page::after { display: none !important; }
+  .renglon{height:calc((14in - 2.5in)/26);min-height:0;max-height:none;border-bottom:1px solid #ccc;overflow:visible}
+  .rt,.rt:focus{font-size:12pt;text-align:justify;text-align-last:justify;white-space:nowrap;overflow:hidden;background:none!important;line-height:calc((14in - 2.5in)/26)}
+  .rt.izq,.rt.izq:focus{text-align:left!important;text-align-last:left!important}
+  .rt.cen,.rt.cen:focus{text-align:center!important;text-align-last:center!important}
+  .rt.der,.rt.der:focus{text-align:right!important;text-align-last:right!important}
+  .rt.overflow-warn{border-bottom:1px solid #ccc !important;background:none !important}
+  .rn{font-size:9pt;color:#aaa;line-height:calc((14in - 2.5in)/26);width:22pt}
+  .hoja{display:none}
+  .hl-find{background:none!important;color:inherit!important}
+}
+</style>
+</head>
+<body>
+
+<div class="title-bar">
+  <span class="logo">&#9878;</span>
+  <span class="doc-name">Plantilla Judicial &mdash; 26 Renglones &middot; Papel Legal 8.5&quot;&times;14&quot;</span>
+  <span class="hint">Clic en un renglon para editar &middot; Tab = siguiente &middot; Suprimir en renglon vacio = sube el texto</span>
+</div>
+
+<div class="ribbon">
+  <div class="ribbon-tabs">
+    <button class="rtab active" onclick="showTab(event,'inicio')">Inicio</button>
+    <button class="rtab" onclick="showTab(event,'insertar')">Insertar</button>
+    <button class="rtab" onclick="showTab(event,'vista')">Vista</button>
+    <button class="rtab" onclick="showTab(event,'archivo')">Archivo</button>
+  </div>
+  <div class="ribbon-panel active" id="tab-inicio">
+    <div class="rgroup-wrap">
+      <div class="rgroup">
+        <button class="rb primary" onclick="togglePaste()">&#128203; Pegar texto</button>
+        <button class="rb gold" onclick="reajustarTexto(false)" title="Ajusta todo el texto del documento para adaptarlo a la tipografía o tamaño actual">🔄 Reajustar texto</button>
+      </div>
+      <span class="rgroup-label">Portapapeles / Flujo</span>
+    </div>
+    <div class="rsep"></div>
+    <div class="rgroup-wrap">
+      <div class="rgroup">
+        <select class="rsel" id="selFont" onchange="aplicarFuente()" style="width:130px">
+          <option value="Times New Roman" selected>Times New Roman</option>
+          <option value="Arial">Arial</option>
+          <option value="Calibri">Calibri</option>
+          <option value="Courier New">Courier New</option>
+          <option value="Georgia">Georgia</option>
+        </select>
+        <select class="rsel" id="selSize" onchange="aplicarTamano()" style="width:52px">
+          <option>9</option><option>10</option><option>11</option>
+          <option selected>12</option><option>14</option><option>16</option>
+          <option>18</option><option>20</option><option>24</option>
+        </select>
+      </div>
+      <span class="rgroup-label">Fuente</span>
+    </div>
+    <div class="rsep"></div>
+    <div class="rgroup-wrap">
+      <div class="rgroup">
+        <button class="rb rb-b" id="btn-bold"   onclick="fmt('bold')"      title="Negrita Ctrl+B">N</button>
+        <button class="rb rb-i" id="btn-italic" onclick="fmt('italic')"    title="Cursiva Ctrl+I">K</button>
+        <button class="rb rb-u" id="btn-under"  onclick="fmt('underline')" title="Subrayado Ctrl+U">S</button>
+        <div class="color-wrap" title="Color de texto">
+          <input class="color-inp" type="color" id="colorText" value="#000000" onchange="aplicarColor()">
+          <div class="color-bar" id="colorBar" style="background:#000"></div>
+        </div>
+      </div>
+      <span class="rgroup-label">Formato</span>
+    </div>
+    <div class="rsep"></div>
+    <div class="rgroup-wrap">
+      <div class="rgroup">
+        <button class="rb" id="btn-izq" onclick="alinear('izq')"  title="Izquierda">&#8676;</button>
+        <button class="rb" id="btn-cen" onclick="alinear('cen')"  title="Centrar">&#8691;</button>
+        <button class="rb" id="btn-der" onclick="alinear('der')"  title="Derecha">&#8677;</button>
+        <button class="rb active" id="btn-jus" onclick="alinear('jus')" title="Justificar">&#8660;</button>
+      </div>
+      <span class="rgroup-label">Parrafo</span>
+    </div>
+    <div class="rsep"></div>
+    <div class="rgroup-wrap">
+      <div class="rgroup">
+        <button class="rb danger" onclick="limpiarTodo()">&#128465; Limpiar</button>
+      </div>
+      <span class="rgroup-label">Editar</span>
+    </div>
+  </div>
+  <div class="ribbon-panel" id="tab-insertar">
+    <div class="rgroup-wrap">
+      <div class="rgroup">
+        <button class="rb primary" onclick="agregarPagina()">+ Agregar pagina</button>
+        <button class="rb" onclick="eliminarUltimaPagina()">&#8722; Quitar ultima</button>
+      </div>
+      <span class="rgroup-label">Paginas</span>
+    </div>
+    <div class="rsep"></div>
+    <div class="rgroup-wrap">
+      <div class="rgroup">
+        <button class="rb" onclick="insertarLineaEnBlanco()" title="Insertar linea en blanco en posicion actual">&#9135; Linea en blanco</button>
+      </div>
+      <span class="rgroup-label">Insertar</span>
+    </div>
+  </div>
+  <div class="ribbon-panel" id="tab-vista">
+    <div class="rgroup-wrap">
+      <div class="rgroup">
+        <button class="rb" onclick="cambiarZoom(-10)">&#8722;</button>
+        <input type="range" id="zoomSlider" min="50" max="130" value="100" oninput="setZoom(this.value)" style="width:90px;accent-color:#1a2744">
+        <button class="rb" onclick="cambiarZoom(10)">+</button>
+        <span id="zoomLabel" style="font-size:.75rem;font-family:Arial,sans-serif;min-width:34px">100%</span>
+      </div>
+      <span class="rgroup-label">Zoom</span>
+    </div>
+    <div class="rsep"></div>
+    <div class="rgroup-wrap">
+      <div class="rgroup">
+        <button class="rb" onclick="toggleNumeros()" id="btnNums">&#35; Numeros</button>
+        <button class="rb" onclick="toggleLineas()" id="btnLineas">&#9135; Lineas</button>
+        <button class="rb active" onclick="toggleGuias()" id="btnGuias">📐 Guías</button>
+      </div>
+      <span class="rgroup-label">Mostrar</span>
+    </div>
+    <div class="rsep"></div>
+    <div class="rgroup-wrap">
+      <div class="rgroup">
+        <button class="rb" onclick="toggleFind()">&#128269; Buscar</button>
+      </div>
+      <span class="rgroup-label">Buscar</span>
+    </div>
+  </div>
+  <div class="ribbon-panel" id="tab-archivo">
+    <div class="rgroup-wrap">
+      <div class="rgroup">
+        <button class="rb primary" onclick="guardarLocal()">&#128190; Guardar</button>
+        <button class="rb" onclick="cargarLocal()">&#128194; Recuperar</button>
+        <button class="rb" onclick="descargarJSON()" title="Descargar como archivo borrador (.json)">📥 Descargar borrador</button>
+        <button class="rb" onclick="subirJSON()" title="Cargar un archivo borrador (.json)">📤 Cargar borrador</button>
+        <input type="file" id="fileInput" accept=".json" style="display:none" onchange="leerJSON(event)">
+      </div>
+      <span class="rgroup-label">Guardar y Archivo</span>
+    </div>
+    <div class="rsep"></div>
+    <div class="rgroup-wrap">
+      <div class="rgroup" style="flex-direction:column;align-items:flex-start;gap:4px">
+        <div style="display:flex;align-items:center;gap:4px">
+          <input type="text" id="pdfName"
+            placeholder="Nombre del PDF (opcional)"
+            style="height:26px;width:210px;border:1px solid #c8b898;border-radius:3px;padding:0 8px;font-family:Arial,sans-serif;font-size:.78rem;outline:none"
+            onfocus="this.style.borderColor='#1a2744'" onblur="this.style.borderColor='#c8b898'">
+          <button class="rb gold" onclick="imprimirPDF()" title="Imprimir o guardar como PDF">&#128424; PDF</button>
+        </div>
+      </div>
+      <span class="rgroup-label">Exportar PDF</span>
+    </div>
+  </div>
+</div>
+
+<div class="status-bar">
+  <span id="stPages">Paginas: 1</span>
+  <span id="stLines">Renglones: 0</span>
+  <span id="stPos">Posicion: &mdash;</span>
+  <div class="pagnav">
+    Ir a pagina:
+    <input type="number" id="goPage" min="1" value="1" onchange="irAPagina(this.value)">
+    <button class="rb" style="height:20px;font-size:.7rem" onclick="irAPagina(document.getElementById('goPage').value)">Ir</button>
+  </div>
+  <div class="zoom-ctrl">
+    Zoom:
+    <input type="range" min="50" max="130" value="100" oninput="setZoom(this.value)" id="zoomSlider2" style="width:70px;accent-color:#1a2744">
+    <span id="zoomLabel2">100%</span>
+  </div>
+</div>
+
+<div class="paste-zone" id="pasteZone">
+  <label>Pega todo el texto aqui &mdash; se distribuye automaticamente en todas las paginas</label>
+  <textarea id="txtInput" placeholder="Ctrl+V para pegar..."></textarea>
+  <div class="paste-actions">
+    <button class="rb primary" style="height:30px;font-size:.82rem" onclick="procesarTexto()">&#10004; Distribuir en plantilla</button>
+    <button class="rb danger"  style="height:30px;font-size:.82rem" onclick="togglePaste()">Cancelar</button>
+    <span style="font-size:.72rem;color:#888;font-family:Arial,sans-serif">26 renglones por pagina &middot; hasta 40 paginas</span>
+  </div>
+</div>
+
+<div class="find-bar" id="findBar">
+  <label>&#128269; Buscar en el documento</label>
+  <input type="text" id="findInput" placeholder="Escribi el texto..." oninput="buscar()">
+  <div class="find-actions">
+    <button class="rb" style="height:24px;font-size:.75rem" onclick="findPrev()">&#8593; Anterior</button>
+    <button class="rb" style="height:24px;font-size:.75rem" onclick="findNext()">&#8595; Siguiente</button>
+    <span class="find-info" id="findInfo"></span>
+    <button class="rb" style="height:24px;font-size:.75rem;margin-left:.5rem" onclick="toggleFind()">&#10005;</button>
+  </div>
+</div>
+
+<div class="pages-wrap" id="pagesWrap"></div>
+
+<script>
+var LINES = 26, MAX_PAGES = 40, MAX_LINES = 26 * 40, CW = 558;
+var lastFocused = null; // ultimo renglon con foco
+var zoom = 100, showNums = true, showLines = true, showGuias = true;
+var focusedP = 0, focusedL = 0;
+var findMatches = [], findIdx = -1;
+var _ctx = null;
+
+function getCtx() {
+  if (!_ctx) { _ctx = document.createElement('canvas').getContext('2d'); }
+  return _ctx;
+}
+function actualizarCtxFont() {
+  var fontName = document.getElementById('selFont').value || 'Times New Roman';
+  var fontSizePt = parseInt(document.getElementById('selSize').value) || 12;
+  var fontSizePx = fontSizePt * 1.3333; // 1pt = 1.3333px
+  getCtx().font = fontSizePx + 'px "' + fontName + '"';
+}
+function mw(t) {
+  actualizarCtxFont();
+  return getCtx().measureText(t).width;
+}
+function verificarDesborde(el) {
+  if (!el) return;
+  var text = el.textContent || "";
+  if (mw(text) > CW) {
+    el.classList.add('overflow-warn');
+    el.title = "El texto supera el ancho permitido del renglón y se cortará.";
+  } else {
+    el.classList.remove('overflow-warn');
+    el.title = "";
+  }
+}
+
+// ── Medir y dividir texto ─────────────────────────────────────────────
+function wrapPara(para) {
+  if (!para.trim()) return [{ text: '', izq: true }];
+  var words = para.split(' '), lines = [], line = '';
+  for (var i = 0; i < words.length; i++) {
+    var w = words[i], test = line ? line + ' ' + w : w;
+    if (mw(test) <= CW) { line = test; }
+    else {
+      if (line) lines.push({ text: line, izq: false });
+      if (mw(w) > CW) {
+        var sub = '';
+        for (var k = 0; k < w.length; k++) {
+          if (mw(sub + w[k]) <= CW) sub += w[k];
+          else { lines.push({ text: sub, izq: false }); sub = w[k]; }
+        }
+        line = sub;
+      } else line = w;
+    }
+  }
+  if (line !== '') lines.push({ text: line, izq: false });
+  return lines.length ? lines : [{ text: '', izq: true }];
+}
+
+function textToLines(raw) {
+  var paras = raw.split(/\r?\n/), all = [];
+  for (var i = 0; i < paras.length; i++) {
+    var ws = wrapPara(paras[i]);
+    for (var j = 0; j < ws.length; j++) {
+      all.push(ws[j]);
+      if (all.length >= MAX_LINES) return all;
+    }
+  }
+  return all;
+}
+
+// ── Subir texto al borrar renglón vacío ───────────────────────────────
+function shiftLinesUp(startP, startL) {
+  var wrap = document.getElementById('pagesWrap');
+  var totalPages = wrap.querySelectorAll('.page').length;
+  var els = [];
+  for (var p = startP; p <= totalPages; p++) {
+    var from = (p === startP) ? startL : 1;
+    for (var l = from; l <= LINES; l++) {
+      var el = document.querySelector('[data-p="'+p+'"][data-l="'+l+'"]');
+      if (el) els.push(el);
+    }
+  }
+  for (var i = 0; i < els.length - 1; i++) {
+    els[i].innerHTML  = els[i+1].innerHTML;
+    els[i].className  = els[i+1].className;
+  }
+  var last = els[els.length - 1];
+  if (last) { last.innerHTML = ''; last.className = 'rt izq'; }
+  var cur = document.querySelector('[data-p="'+startP+'"][data-l="'+startL+'"]');
+  if (cur) {
+    cur.focus();
+    try {
+      var r = document.createRange(); r.selectNodeContents(cur); r.collapse(true);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+    } catch(e) {}
+  }
+}
+
+// ── Crear renglón editable ────────────────────────────────────────────
+function crearRenglon(pageNum, lineNum, lineObj) {
+  var row = document.createElement('div'); row.className = 'renglon';
+  var num = document.createElement('div'); num.className = 'rn'; num.textContent = lineNum;
+  if (!showNums) num.style.visibility = 'hidden';
+  var txt = document.createElement('div');
+  
+  if (lineObj.cen) txt.className = 'rt cen';
+  else if (lineObj.der) txt.className = 'rt der';
+  else if (lineObj.izq) txt.className = 'rt izq';
+  else txt.className = 'rt';
+  
+  txt.contentEditable = 'true';
+  txt.spellcheck = true;
+  if (lineObj.html) txt.innerHTML = lineObj.html;
+  else txt.textContent = lineObj.text || '';
+  txt.setAttribute('data-p', pageNum);
+  txt.setAttribute('data-l', lineNum);
+  
+  txt.addEventListener('focus', function() {
+    lastFocused = txt;
+    focusedP = pageNum; focusedL = lineNum;
+    document.getElementById('stPos').textContent = 'Pag. ' + pageNum + ' / Rengl. ' + lineNum;
+    sincronizarFormato();
+  });
+  txt.addEventListener('input', function() {
+    verificarDesborde(txt);
+  });
+  txt.addEventListener('keydown', function(ev) {
+    if (ev.key === 'Enter') {
+      ev.preventDefault();
+      var nL = lineNum + 1, nP = pageNum;
+      if (nL > LINES) { nL = 1; nP++; }
+      goLine(nP, nL);
+    } else if (ev.key === 'Tab') {
+      ev.preventDefault();
+      if (ev.shiftKey) { var pL = lineNum - 1, pP = pageNum; if (pL < 1) { pL = LINES; pP--; } goLine(pP, pL); }
+      else { var nL2 = lineNum + 1, nP2 = pageNum; if (nL2 > LINES) { nL2 = 1; nP2++; } goLine(nP2, nL2); }
+    }
+  });
+  txt.addEventListener('blur', function() {
+    var w = mw(txt.textContent);
+    if (!txt.className.match(/cen|der/)) {
+      if (w >= CW * 0.45) txt.className = 'rt';
+      else txt.className = 'rt izq';
+    }
+    verificarDesborde(txt);
+  });
+  
+  if (txt.textContent) {
+    setTimeout(function() { verificarDesborde(txt); }, 50);
+  }
+  
+  row.appendChild(num); row.appendChild(txt); return row;
+}
+
+function goLine(p, l) {
+  var el = document.querySelector('[data-p="'+p+'"][data-l="'+l+'"]');
+  if (!el) return; el.focus();
+  try { var r = document.createRange(); r.selectNodeContents(el); r.collapse(false); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); } catch(e) {}
+}
+
+// ── Renderizar páginas ────────────────────────────────────────────────
+function renderPages(lines) {
+  var wrap = document.getElementById('pagesWrap'); wrap.innerHTML = '';
+  var pages = Math.min(Math.max(1, Math.ceil(lines.length / LINES)), MAX_PAGES);
+  for (var p = 1; p <= pages; p++) {
+    var pe = document.createElement('div'); pe.className = showGuias ? 'page show-guides' : 'page'; pe.id = 'pag-'+p;
+    pe.style.transform = 'scale(' + (zoom/100) + ')';
+    pe.style.marginBottom = ((zoom - 100) * 12.1) + 'px';
+    var ct = document.createElement('div'); ct.className = 'page-content';
+    for (var l = 1; l <= LINES; l++) {
+      var idx = (p-1)*LINES + (l-1);
+      ct.appendChild(crearRenglon(p, l, idx < lines.length ? lines[idx] : { text:'', izq:true }));
+    }
+    var hj = document.createElement('div'); hj.className = 'hoja'; hj.textContent = 'Hoja '+p;
+    pe.appendChild(ct); pe.appendChild(hj); wrap.appendChild(pe);
+  }
+  document.getElementById('stPages').textContent = 'Paginas: ' + pages;
+  document.getElementById('stLines').textContent = 'Renglones: ' + lines.length;
+  document.getElementById('goPage').max = pages;
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────
+function showTab(ev, id) {
+  document.querySelectorAll('.ribbon-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.rtab').forEach(function(t){ t.classList.remove('active'); });
+  document.getElementById('tab-'+id).classList.add('active');
+  ev.target.classList.add('active');
+}
+
+// ── Pegar texto ───────────────────────────────────────────────────────
+function togglePaste() {
+  var z = document.getElementById('pasteZone');
+  if (z.classList.contains('visible')) z.classList.remove('visible');
+  else { z.classList.add('visible'); document.getElementById('txtInput').focus(); }
+}
+function procesarTexto() {
+  var raw = document.getElementById('txtInput').value;
+  if (!raw.trim()) { alert('No hay texto.'); return; }
+  actualizarCtxFont();
+  var paras = raw.split(/\r?\n/).map(function(p) {
+    return { text: p, align: 'jus' };
+  });
+  var lines = paragraphsToLines(paras);
+  renderPages(lines);
+  togglePaste();
+  if (lines.length >= MAX_LINES) alert('Texto excede 40 paginas. Se muestran los primeros 1040 renglones.');
+}
+document.getElementById('txtInput').addEventListener('paste', function(){ setTimeout(procesarTexto, 300); });
+
+// ── Formato ───────────────────────────────────────────────────────────
+function fmt(cmd) {
+  if (lastFocused) lastFocused.focus();
+  document.execCommand(cmd, false, null);
+  sincronizarFormato();
+}
+function aplicarFuente() {
+  var fontName = document.getElementById('selFont').value;
+  var wrap = document.getElementById('pagesWrap');
+  if (wrap) wrap.style.fontFamily = fontName;
+  document.querySelectorAll('.rt').forEach(function(el) {
+    el.style.fontFamily = fontName;
+  });
+  actualizarCtxFont();
+  if (document.querySelectorAll('.rt').length > 0) {
+    reajustarTexto(true);
+  }
+}
+function aplicarTamano() {
+  var s = document.getElementById('selSize').value;
+  var size = s + 'pt';
+  var wrap = document.getElementById('pagesWrap');
+  if (wrap) wrap.style.fontSize = size;
+  document.querySelectorAll('.rt').forEach(function(el) {
+    el.style.fontSize = size;
+  });
+  actualizarCtxFont();
+  if (document.querySelectorAll('.rt').length > 0) {
+    reajustarTexto(true);
+  }
+}
+function aplicarColor() {
+  var c = document.getElementById('colorText').value;
+  document.getElementById('colorBar').style.background = c;
+  document.execCommand('foreColor', false, c);
+}
+function alinear(tipo) {
+  var el = lastFocused;
+  if (!el || !el.classList.contains('rt')) return;
+  el.classList.remove('izq','cen','der');
+  ['btn-izq','btn-cen','btn-der','btn-jus'].forEach(function(id){ var b=document.getElementById(id); if(b) b.classList.remove('active'); });
+  if (tipo==='izq') { el.classList.add('izq'); document.getElementById('btn-izq').classList.add('active'); }
+  else if (tipo==='cen') { el.classList.add('cen'); document.getElementById('btn-cen').classList.add('active'); }
+  else if (tipo==='der') { el.classList.add('der'); document.getElementById('btn-der').classList.add('active'); }
+  else document.getElementById('btn-jus').classList.add('active');
+}
+function sincronizarFormato() {
+  var b = document.getElementById('btn-bold');   if(b) b.classList.toggle('active', document.queryCommandState('bold'));
+  var i = document.getElementById('btn-italic'); if(i) i.classList.toggle('active', document.queryCommandState('italic'));
+  var u = document.getElementById('btn-under');  if(u) u.classList.toggle('active', document.queryCommandState('underline'));
+}
+
+// ── Zoom ──────────────────────────────────────────────────────────────
+function setZoom(v) {
+  zoom = parseInt(v);
+  document.getElementById('zoomSlider').value = v; document.getElementById('zoomSlider2').value = v;
+  document.getElementById('zoomLabel').textContent = v+'%'; document.getElementById('zoomLabel2').textContent = v+'%';
+  document.querySelectorAll('.page').forEach(function(p){ p.style.transform='scale('+(zoom/100)+')'; p.style.marginBottom=((zoom-100)*12.1)+'px'; });
+}
+function cambiarZoom(d) { setZoom(Math.min(130, Math.max(50, zoom+d))); }
+
+// ── Mostrar/ocultar ───────────────────────────────────────────────────
+function toggleNumeros() {
+  showNums = !showNums;
+  document.querySelectorAll('.rn').forEach(function(n){ n.style.visibility = showNums ? 'visible' : 'hidden'; });
+  document.getElementById('btnNums').classList.toggle('active', showNums);
+}
+function toggleLineas() {
+  showLines = !showLines;
+  document.querySelectorAll('.renglon').forEach(function(r){ r.style.borderBottom = showLines ? '1px solid #d0d0d0' : 'none'; });
+}
+
+// ── Navegación ────────────────────────────────────────────────────────
+function irAPagina(n) {
+  var pg = document.getElementById('pag-'+n);
+  if (pg) pg.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// ── Buscar ────────────────────────────────────────────────────────────
+function toggleFind() {
+  var fb = document.getElementById('findBar');
+  if (fb.classList.contains('visible')) { fb.classList.remove('visible'); limpiarHL(); }
+  else { fb.classList.add('visible'); document.getElementById('findInput').focus(); }
+}
+function buscar() {
+  limpiarHL(); findMatches = []; findIdx = -1;
+  var q = document.getElementById('findInput').value.toLowerCase();
+  if (!q) { document.getElementById('findInfo').textContent = ''; return; }
+  document.querySelectorAll('.rt').forEach(function(el){ if (el.textContent.toLowerCase().indexOf(q) >= 0) findMatches.push(el); });
+  document.getElementById('findInfo').textContent = findMatches.length + ' encontrado(s)';
+  if (findMatches.length) findNext();
+}
+function findNext() { if (!findMatches.length) return; findIdx = (findIdx+1) % findMatches.length; resaltarActual(); }
+function findPrev() { if (!findMatches.length) return; findIdx = (findIdx-1+findMatches.length) % findMatches.length; resaltarActual(); }
+function resaltarActual() {
+  limpiarHL();
+  var q = document.getElementById('findInput').value;
+  var el = findMatches[findIdx]; if (!el) return;
+  el.innerHTML = el.innerHTML.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'), '<span class="hl-find current">$1</span>');
+  el.scrollIntoView({ behavior:'smooth', block:'center' });
+  document.getElementById('findInfo').textContent = (findIdx+1) + ' de ' + findMatches.length;
+}
+function limpiarHL() {
+  document.querySelectorAll('.hl-find').forEach(function(h){ var p=h.parentNode; p.replaceChild(document.createTextNode(h.textContent),h); p.normalize(); });
+}
+
+// ── Páginas dinámicas ─────────────────────────────────────────────────
+function agregarPagina() {
+  var wrap = document.getElementById('pagesWrap');
+  var n = wrap.querySelectorAll('.page').length;
+  if (n >= MAX_PAGES) { alert('Maximo 40 paginas.'); return; }
+  var p = n + 1;
+  var pe = document.createElement('div'); pe.className = showGuias ? 'page show-guides' : 'page'; pe.id='pag-'+p;
+  pe.style.transform = 'scale('+(zoom/100)+')'; pe.style.marginBottom=((zoom-100)*12.1)+'px';
+  var ct = document.createElement('div'); ct.className='page-content';
+  for (var l=1; l<=LINES; l++) ct.appendChild(crearRenglon(p, l, {text:'', izq:true}));
+  var hj = document.createElement('div'); hj.className='hoja'; hj.textContent='Hoja '+p;
+  pe.appendChild(ct); pe.appendChild(hj); wrap.appendChild(pe);
+  document.getElementById('stPages').textContent = 'Paginas: '+p;
+  document.getElementById('goPage').max = p;
+  pe.scrollIntoView({behavior:'smooth'});
+}
+function eliminarUltimaPagina() {
+  var wrap = document.getElementById('pagesWrap');
+  var pages = wrap.querySelectorAll('.page');
+  if (pages.length <= 1) { alert('Debe quedar al menos una pagina.'); return; }
+  if (!confirm('Eliminar la ultima pagina?')) return;
+  pages[pages.length-1].remove();
+  var n = wrap.querySelectorAll('.page').length;
+  document.getElementById('stPages').textContent = 'Paginas: '+n;
+  document.getElementById('goPage').max = n;
+}
+function insertarLineaEnBlanco() {
+  if (!focusedP) { alert('Hace clic en un renglon primero.'); return; }
+  for (var i=LINES; i>focusedL; i--) {
+    var src = document.querySelector('[data-p="'+focusedP+'"][data-l="'+(i-1)+'"]');
+    var dst = document.querySelector('[data-p="'+focusedP+'"][data-l="'+i+'"]');
+    if (src && dst) { dst.innerHTML=src.innerHTML; dst.className=src.className; }
+  }
+  var cur = document.querySelector('[data-p="'+focusedP+'"][data-l="'+focusedL+'"]');
+  if (cur) { cur.innerHTML=''; cur.className='rt izq'; cur.focus(); }
+}
+
+// ── Guardar / Cargar ──────────────────────────────────────────────────
+function guardarLocal() {
+  var data = [];
+  document.querySelectorAll('.rt').forEach(function(el){ data.push({p:el.dataset.p, l:el.dataset.l, html:el.innerHTML, cls:el.className}); });
+  try { localStorage.setItem('pj_data', JSON.stringify(data)); alert('Guardado correctamente.'); }
+  catch(e) { alert('Error: '+e.message); }
+}
+function cargarLocal() {
+  try {
+    var raw = localStorage.getItem('pj_data');
+    if (!raw) { alert('No hay datos guardados.'); return; }
+    if (!confirm('Esto reemplaza el contenido actual. Continuar?')) return;
+    var data = JSON.parse(raw);
+    var maxP = 1;
+    data.forEach(function(d){ if (parseInt(d.p)>maxP) maxP=parseInt(d.p); });
+    var lines = []; for (var i=0; i<maxP*LINES; i++) lines.push({text:'', izq:true});
+    renderPages(lines);
+    data.forEach(function(d){
+      var el = document.querySelector('[data-p="'+d.p+'"][data-l="'+d.l+'"]');
+      if (el) { el.innerHTML=d.html; el.className=d.cls; }
+    });
+    alert('Contenido recuperado.');
+  } catch(e) { alert('Error: '+e.message); }
+}
+
+// ── Limpiar ───────────────────────────────────────────────────────────
+function limpiarTodo() {
+  if (!confirm('Borrar todo el contenido?')) return;
+  renderPages([]);
+}
+
+// ── Atajos globales ───────────────────────────────────────────────────
+document.addEventListener('keydown', function(ev) {
+  // Ctrl+F = buscar
+  if ((ev.ctrlKey||ev.metaKey) && ev.key==='f') { ev.preventDefault(); toggleFind(); }
+  // Escape = cerrar buscar
+  if (ev.key==='Escape') { var fb=document.getElementById('findBar'); if(fb.classList.contains('visible')) toggleFind(); }
+
+  // Suprimir o Retroceso en renglon vacio = subir texto
+  if (ev.key==='Backspace' || ev.key==='Delete') {
+    var el = document.activeElement;
+    if (el && el.getAttribute && el.getAttribute('data-p')) {
+      // Quitar <br> y espacios para verificar si esta realmente vacio
+      var contenido = el.innerHTML.replace(/<br>/gi,'').replace(/<br\/>/gi,'').replace(/&nbsp;/gi,'').trim();
+      var textoVacio = el.textContent.replace(/\u00a0/g,'').trim() === '';
+      if (contenido === '' || textoVacio) {
+        ev.preventDefault();
+        var p = parseInt(el.getAttribute('data-p'));
+        var l = parseInt(el.getAttribute('data-l'));
+        shiftLinesUp(p, l);
+      }
+    }
+  }
+});
+
+// ── Imprimir con nombre personalizado ────────────────────────────────
+function imprimirPDF() {
+  var nombre = document.getElementById('pdfName').value.trim();
+  if (nombre) {
+    // Cambiar el título del documento temporalmente → el navegador lo usa como nombre del PDF
+    var tituloOriginal = document.title;
+    document.title = nombre;
+    window.print();
+    // Restaurar título después de imprimir
+    setTimeout(function() { document.title = tituloOriginal; }, 2000);
+  } else {
+    window.print();
+  }
+}
+
+// ── Guías, Reflow e Importación/Exportación ───────────────────────────
+function toggleGuias() {
+  showGuias = !showGuias;
+  document.querySelectorAll('.page').forEach(function(p){
+    p.classList.toggle('show-guides', showGuias);
+  });
+  var btn = document.getElementById('btnGuias');
+  if (btn) btn.classList.toggle('active', showGuias);
+}
+
+function obtenerTextoDocumento() {
+  var rts = document.querySelectorAll('.rt');
+  var paragraphs = [];
+  var currentPara = "";
+  
+  for (var i = 0; i < rts.length; i++) {
+    var txt = rts[i].textContent || "";
+    var textTrimmed = txt.replace(/\u00a0/g,' ').trim();
+    var isIzq = rts[i].classList.contains('izq');
+    var isCen = rts[i].classList.contains('cen');
+    var isDer = rts[i].classList.contains('der');
+    var isBreak = isIzq || isCen || isDer || textTrimmed === "";
+    
+    if (textTrimmed === "") {
+      if (currentPara !== "") {
+        paragraphs.push({ text: currentPara, align: 'jus' });
+        currentPara = "";
+      }
+      paragraphs.push({ text: "", align: 'izq' });
+    } else {
+      if (currentPara === "") {
+        currentPara = textTrimmed;
+      } else {
+        currentPara += " " + textTrimmed;
+      }
+      if (isBreak) {
+        var align = 'jus';
+        if (isCen) align = 'cen';
+        else if (isDer) align = 'der';
+        else if (isIzq) align = 'izq';
+        
+        paragraphs.push({ text: currentPara, align: align });
+        currentPara = "";
+      }
+    }
+  }
+  if (currentPara !== "") {
+    paragraphs.push({ text: currentPara, align: 'jus' });
+  }
+  return paragraphs;
+}
+
+function paragraphsToLines(paras) {
+  var all = [];
+  for (var i = 0; i < paras.length; i++) {
+    var pObj = paras[i];
+    if (pObj.text === "") {
+      all.push({ text: "", izq: true });
+      if (all.length >= MAX_LINES) return all;
+      continue;
+    }
+    var ws = wrapPara(pObj.text);
+    for (var j = 0; j < ws.length; j++) {
+      var isLastLine = (j === ws.length - 1);
+      var lineAlign = pObj.align;
+      if (pObj.align === 'jus') {
+        if (isLastLine) lineAlign = 'izq';
+        else lineAlign = 'jus';
+      }
+      all.push({
+        text: ws[j].text,
+        izq: (lineAlign === 'izq'),
+        cen: (lineAlign === 'cen'),
+        der: (lineAlign === 'der'),
+        jus: (lineAlign === 'jus')
+      });
+      if (all.length >= MAX_LINES) return all;
+    }
+  }
+  return all;
+}
+
+function reajustarTexto(silent) {
+  var paras = obtenerTextoDocumento();
+  while (paras.length > 0 && paras[paras.length - 1].text.trim() === "" && paras.length > 1) {
+    paras.pop();
+  }
+  var hasContent = paras.some(function(p) { return p.text.trim() !== ""; });
+  if (!hasContent) {
+    if (!silent) alert("No hay texto para reajustar.");
+    return;
+  }
+  actualizarCtxFont();
+  var lines = paragraphsToLines(paras);
+  renderPages(lines);
+  if (!silent) alert("Texto reajustado correctamente con el formato actual.");
+}
+
+function descargarJSON() {
+  var data = {
+    fontName: document.getElementById('selFont').value,
+    fontSize: document.getElementById('selSize').value,
+    showNums: showNums,
+    showLines: showLines,
+    showGuias: showGuias,
+    lines: []
+  };
+  document.querySelectorAll('.rt').forEach(function(el){
+    data.lines.push({
+      p: el.dataset.p,
+      l: el.dataset.l,
+      html: el.innerHTML,
+      cls: el.className
+    });
+  });
+  var jsonStr = JSON.stringify(data, null, 2);
+  var blob = new Blob([jsonStr], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  var name = document.getElementById('pdfName').value.trim() || 'borrador_judicial';
+  a.download = name + '.json';
+  a.href = url;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function subirJSON() {
+  document.getElementById('fileInput').click();
+}
+
+function leerJSON(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = JSON.parse(e.target.result);
+      if (!data.lines || !Array.isArray(data.lines)) {
+        alert("Archivo JSON no válido para esta plantilla.");
+        return;
+      }
+      if (data.fontName) document.getElementById('selFont').value = data.fontName;
+      if (data.fontSize) document.getElementById('selSize').value = data.fontSize;
+      if (data.showNums !== undefined) {
+        showNums = data.showNums;
+        document.getElementById('btnNums').classList.toggle('active', showNums);
+      }
+      if (data.showLines !== undefined) {
+        showLines = data.showLines;
+      }
+      if (data.showGuias !== undefined) {
+        showGuias = data.showGuias;
+        var btn = document.getElementById('btnGuias');
+        if (btn) btn.classList.toggle('active', showGuias);
+      }
+      var maxP = 1;
+      data.lines.forEach(function(d){ if (parseInt(d.p) > maxP) maxP = parseInt(d.p); });
+      var emptyLines = [];
+      for (var i = 0; i < maxP * LINES; i++) emptyLines.push({ text: '', izq: true });
+      renderPages(emptyLines);
+      data.lines.forEach(function(d){
+        var el = document.querySelector('[data-p="'+d.p+'"][data-l="'+d.l+'"]');
+        if (el) {
+          el.innerHTML = d.html;
+          el.className = d.cls;
+          if (el.textContent) verificarDesborde(el);
+        }
+      });
+      var wrap = document.getElementById('pagesWrap');
+      if (wrap) {
+        wrap.style.fontFamily = data.fontName || 'Times New Roman';
+        wrap.style.fontSize = (data.fontSize || 12) + 'pt';
+      }
+      actualizarCtxFont();
+      event.target.value = '';
+      alert("Borrador cargado correctamente.");
+    } catch(err) {
+      alert("Error al procesar el archivo: " + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────
+actualizarCtxFont();
+renderPages([]);
+</script>
+</body>
+</html>

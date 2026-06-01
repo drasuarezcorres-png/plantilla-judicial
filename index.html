@@ -105,17 +105,22 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
   .page{width:100%;height:calc(14in - 2.5in);padding:0;box-shadow:none;page-break-after:always;break-after:page;transform:none!important}
   .page:last-child{page-break-after:avoid;break-after:avoid}
   .page::before, .page::after { display: none !important; }
-  .renglon{height:calc((14in - 2.5in)/26);min-height:0;max-height:none;border-bottom:1px solid #ccc;overflow:visible}
+  
+  /* MEJORA: Remueve las líneas horizontales en el PDF */
+  .renglon{height:calc((14in - 2.5in)/26);min-height:0;max-height:none;border-bottom:none !important;overflow:visible}
+  
   .rt,.rt:focus{font-size:12pt;text-align:justify;text-align-last:justify;white-space:nowrap;overflow:hidden;background:none!important;line-height:calc((14in - 2.5in)/26)}
   .rt.izq,.rt.izq:focus{text-align:left!important;text-align-last:left!important}
   .rt.cen,.rt.cen:focus{text-align:center!important;text-align-last:center!important}
   .rt.der,.rt.der:focus{text-align:right!important;text-align-last:right!important}
-  .rt.overflow-warn{border-bottom:1px solid #ccc !important;background:none !important}
-  .rn{font-size:9pt;color:#aaa;line-height:calc((14in - 2.5in)/26);width:22pt}
+  .rt.overflow-warn{border-bottom:none !important;background:none !important}
+  
+  /* MEJORA: Asegura que los números del 1 al 26 permanezcan visibles en el PDF */
+  .rn{font-size:9pt;color:#aaa !important;line-height:calc((14in - 2.5in)/26);width:22pt;display:block !important;visibility:visible !important}
+  
   .hoja{display:none}
   .hl-find{background:none!important;color:inherit!important}
-}
-</style>
+}</style>
 </head>
 <body>
 

@@ -339,7 +339,7 @@ function verificarDesborde(el) {
   }
 }
 
-// ── PROCESAMIENTO ELÁSTICO CON CONSERVACIÓN DE FORMATO (RICH TEXT) ──
+// ── PROCESAMIENTO ELÁSTICO CON PURGA DE RESIDUOS DE WORD ──
 function procesarTextoEnriquecido() {
   var zonaPegado = document.getElementById('txtInput');
   if (!zonaPegado || zonaPegado.innerHTML.trim() === "") { alert('No hay texto para distribuir.'); return; }
@@ -347,9 +347,17 @@ function procesarTextoEnriquecido() {
   actualizarCtxFont();
   var lines = [];
   
-  // Segmentación por bloques de párrafo conservando etiquetas internas
+  // 1. Saneamiento inmediato del HTML bruto (Esto es lo nuevo)
+  var htmlSaneado = zonaPegado.innerHTML
+    .replace(/lang=["'][^"'\n]*["']/gi, '')        // Quita lang="ES" de raíz
+    .replace(/style=["'][^"'\n]*["']/gi, '')       // Quita el style e interlineados sucios de Word
+    .replace(/xml:lang=["'][^"'\n]*["']/gi, '')    // Quita metadatos XML rotos
+    .replace(/class=["'][^"'\n]*["']/gi, '');      // Remueve clases MsoNormal y basuras visuales
+
   var encodingDiv = document.createElement('div');
-  encodingDiv.innerHTML = zonaPegado.innerHTML;
+  encodingDiv.innerHTML = htmlSaneado;
+  
+  // Segmentación por bloques de párrafo conservando etiquetas internas
   var bloques = encodingDiv.innerHTML.split(/<p[^>]*>|<div[^>]*>|<br\s*\/?>/i);
   
   bloques.forEach(function(b) {
@@ -391,7 +399,6 @@ function procesarTextoEnriquecido() {
   togglePaste();
   zonaPegado.innerHTML = "";
 }
-
 function shiftLinesUp(startP, startL) {
   var wrap = document.getElementById('pagesWrap');
   var totalPages = wrap.querySelectorAll('.page').length;

@@ -187,6 +187,15 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
         <button class="rb active" id="btn-jus" onclick="alinear('jus')" title="Justificar">&#8660;</button>
       </div>
       <span class="rgroup-label">Parrafo</span>
+      <div class="rsep"></div>
+    <div class="rgroup-wrap">
+      <div class="rgroup">
+        <button class="rb" onclick="sangria(-1)" title="Disminuir sangría">&#8676;|</button>
+        <button class="rb" onclick="sangria(1)" title="Aumentar sangría">|&#8677;</button>
+        <button class="rb" id="btn-fi" onclick="toggleFirstIndent()" title="Sangría de primera línea">&#182;</button>
+      </div>
+      <span class="rgroup-label">Sangr&iacute;a</span>
+    </div>
     </div>
     <div class="rsep"></div>
     <div class="rgroup-wrap">
@@ -228,6 +237,7 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
         <button class="rb" onclick="toggleNumeros()" id="btnNums">&#35; Numeros</button>
         <button class="rb" onclick="toggleLineas()" id="btnLineas">&#9135; Lineas</button>
         <button class="rb active" onclick="toggleGuias()" id="btnGuias">📐 Guías</button>
+        <button class="rb active" onclick="toggleSpell()" id="btnSpell">&#10003; Corrector</button>
       </div>
       <span class="rgroup-label">Mostrar</span>
     </div>
@@ -259,6 +269,7 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
             style="height:26px;width:210px;border:1px solid #c8b898;border-radius:3px;padding:0 8px;font-family:Arial,sans-serif;font-size:.78rem;outline:none"
             onfocus="this.style.borderColor='#1a2744'" onblur="this.style.borderColor='#c8b898'">
           <button class="rb gold" onclick="imprimirPDF()" title="Imprimir o guardar como PDF">&#128424; PDF</button>
+          <button class="rb gold" onclick="exportarDocx()" title="Descargar como Word (.docx)">&#128462; Word</button>
         </div>
       </div>
       <span class="rgroup-label">Exportar PDF</span>

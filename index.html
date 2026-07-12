@@ -57,12 +57,25 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
 .rt.izq{text-align:left!important;text-align-last:left!important}
 .rt.cen{text-align:center!important;text-align-last:center!important}
 .rt.der{text-align:right!important;text-align-last:right!important}
-.rt[data-indent="1"]{padding-left:2.2em!important}
-.rt[data-indent="2"]{padding-left:4.4em!important}
-.rt[data-indent="3"]{padding-left:6.6em!important}
-.rt[data-indent="4"]{padding-left:8.8em!important}
-.rt.first-indent{text-indent:2.2em}
-.hoja{position:absolute;bottom:22px;right:52px;font-size:9pt;color:#bbb;font-family:Arial,sans-serif}
+.hoja{position:absolute;bottom:22px;right:52px;left:52px;text-align:center;font-size:9pt;color:#bbb;font-family:Arial,sans-serif}
+.page-header{position:absolute;top:10px;left:81px;right:52px;font-family:'Times New Roman',serif;padding-bottom:5px;border-bottom:1px solid #333}
+.page-header .ph-row{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap}
+.page-header .ph-label{font-size:9pt;color:#555}
+.page-header .ph-val{font-size:11pt;font-weight:500;color:#111}
+.ph-empty{opacity:0;pointer-events:none}
+.hdr-modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:500;align-items:center;justify-content:center}
+.hdr-modal.visible{display:flex}
+.hdr-box{background:#fff;border:0.5px solid #c8b898;border-radius:10px;padding:1.5rem 1.75rem;min-width:380px;box-shadow:0 8px 32px rgba(0,0,0,.2);font-family:Arial,sans-serif}
+.hdr-box h3{font-size:1rem;font-weight:500;color:#1a2744;margin-bottom:1.1rem;font-family:'Times New Roman',serif}
+.hdr-field{margin-bottom:.9rem}
+.hdr-field label{display:block;font-size:.72rem;font-weight:500;color:#666;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.35rem}
+.hdr-field input{width:100%;height:34px;border:1px solid #c8b898;border-radius:4px;padding:0 10px;font-family:'Times New Roman',serif;font-size:11pt;outline:none}
+.hdr-field input:focus{border-color:#1a2744}
+.hdr-actions{display:flex;gap:.6rem;justify-content:flex-end;margin-top:1.1rem}
+@media print{
+  .page-header{position:absolute;top:10px;left:0;right:0}
+  .ph-empty{display:none!important}
+}
 .find-bar{display:none;position:fixed;top:120px;right:20px;z-index:200;background:#fff;border:1px solid #c8b898;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.2);padding:.65rem .9rem;font-family:Arial,sans-serif;min-width:280px}
 .find-bar.visible{display:block}
 .find-bar label{font-size:.72rem;font-weight:700;color:#555;display:block;margin-bottom:.3rem}
@@ -117,12 +130,20 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
   .rt.der,.rt.der:focus{text-align:right!important;text-align-last:right!important}
   .rt.overflow-warn{border-bottom:1px solid #ccc !important;background:none !important}
   .rn{font-size:9pt;color:#aaa;line-height:calc((14in - 2.5in)/26);width:22pt}
-  .hoja{display:none}
+  .hoja{
+    display:block !important;
+    position:absolute;
+    bottom:18pt;
+    right:0;
+    left:0;
+    text-align:center;
+    font-size:9pt;
+    color:#555 !important;
+    font-family:'Times New Roman',serif;
+  }
   .hl-find{background:none!important;color:inherit!important}
 }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </head>
 <body>
 
@@ -143,6 +164,7 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
     <div class="rgroup-wrap">
       <div class="rgroup">
         <button class="rb primary" onclick="togglePaste()">&#128203; Pegar texto</button>
+        <button class="rb" onclick="abrirEncabezado()" id="btnHdr" title="Juzgado y N° Expediente en la primera pagina">&#9776; Encabezado</button>
         <button class="rb gold" onclick="reajustarTexto(false)" title="Ajusta todo el texto del documento para adaptarlo a la tipografía o tamaño actual">🔄 Reajustar texto</button>
       </div>
       <span class="rgroup-label">Portapapeles / Flujo</span>
@@ -187,15 +209,6 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
         <button class="rb active" id="btn-jus" onclick="alinear('jus')" title="Justificar">&#8660;</button>
       </div>
       <span class="rgroup-label">Parrafo</span>
-      <div class="rsep"></div>
-    <div class="rgroup-wrap">
-      <div class="rgroup">
-        <button class="rb" onclick="sangria(-1)" title="Disminuir sangría">&#8676;|</button>
-        <button class="rb" onclick="sangria(1)" title="Aumentar sangría">|&#8677;</button>
-        <button class="rb" id="btn-fi" onclick="toggleFirstIndent()" title="Sangría de primera línea">&#182;</button>
-      </div>
-      <span class="rgroup-label">Sangr&iacute;a</span>
-    </div>
     </div>
     <div class="rsep"></div>
     <div class="rgroup-wrap">
@@ -237,7 +250,6 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
         <button class="rb" onclick="toggleNumeros()" id="btnNums">&#35; Numeros</button>
         <button class="rb" onclick="toggleLineas()" id="btnLineas">&#9135; Lineas</button>
         <button class="rb active" onclick="toggleGuias()" id="btnGuias">📐 Guías</button>
-        <button class="rb active" onclick="toggleSpell()" id="btnSpell">&#10003; Corrector</button>
       </div>
       <span class="rgroup-label">Mostrar</span>
     </div>
@@ -269,7 +281,6 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
             style="height:26px;width:210px;border:1px solid #c8b898;border-radius:3px;padding:0 8px;font-family:Arial,sans-serif;font-size:.78rem;outline:none"
             onfocus="this.style.borderColor='#1a2744'" onblur="this.style.borderColor='#c8b898'">
           <button class="rb gold" onclick="imprimirPDF()" title="Imprimir o guardar como PDF">&#128424; PDF</button>
-          <button class="rb gold" onclick="exportarDocx()" title="Descargar como Word (.docx)">&#128462; Word</button>
         </div>
       </div>
       <span class="rgroup-label">Exportar PDF</span>
@@ -314,6 +325,19 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
   </div>
 </div>
 
+<div class="hdr-modal" id="hdrModal" onclick="cerrarFuera(event)">
+  <div class="hdr-box">
+    <h3>&#9878; Encabezado del Escrito &mdash; Pag. 1</h3>
+    <div class="hdr-field"><label>Juzgado</label>
+      <input id="hdrJuzgado" type="text" placeholder="Ej: Juzgado de Primera Instancia Civil N° 1"></div>
+    <div class="hdr-field"><label>N° de Expediente</label>
+      <input id="hdrExpediente" type="text" placeholder="Ej: 123/2026"></div>
+    <div class="hdr-actions">
+      <button class="rb" onclick="cerrarEncabezado()" style="height:32px;font-size:.82rem">Cancelar</button>
+      <button class="rb primary" onclick="aplicarEncabezado()" style="height:32px;font-size:.82rem">&#10004; Aplicar</button>
+    </div>
+  </div>
+</div>
 <div class="pages-wrap" id="pagesWrap"></div>
 
 <script>
@@ -371,18 +395,6 @@ function wrapPara(para) {
   }
   if (line !== '') lines.push({ text: line, izq: false });
   return lines.length ? lines : [{ text: '', izq: true }];
-}
-
-function textToLines(raw) {
-  var paras = raw.split(/\r?\n/), all = [];
-  for (var i = 0; i < paras.length; i++) {
-    var ws = wrapPara(paras[i]);
-    for (var j = 0; j < ws.length; j++) {
-      all.push(ws[j]);
-      if (all.length >= MAX_LINES) return all;
-    }
-  }
-  return all;
 }
 
 // ── Subir texto al borrar renglón vacío ───────────────────────────────
@@ -456,8 +468,10 @@ function crearRenglon(pageNum, lineNum, lineObj) {
   txt.addEventListener('blur', function() {
     var w = mw(txt.textContent);
     if (!txt.className.match(/cen|der/)) {
-      if (w >= CW * 0.45) txt.className = 'rt';
-      else txt.className = 'rt izq';
+      // Preservar clases adicionales (first-indent, etc.)
+      var extra = txt.classList.contains('first-indent') ? ' first-indent' : '';
+      if (w >= CW * 0.45) txt.className = 'rt' + extra;
+      else txt.className = 'rt izq' + extra;
     }
     verificarDesborde(txt);
   });
@@ -489,7 +503,9 @@ function renderPages(lines) {
       ct.appendChild(crearRenglon(p, l, idx < lines.length ? lines[idx] : { text:'', izq:true }));
     }
     var hj = document.createElement('div'); hj.className = 'hoja'; hj.textContent = 'Hoja '+p;
-    pe.appendChild(ct); pe.appendChild(hj); wrap.appendChild(pe);
+    pe.appendChild(ct); pe.appendChild(hj);
+    if (p === 1) pe.appendChild(buildPageHeader());
+    wrap.appendChild(pe);
   }
   document.getElementById('stPages').textContent = 'Paginas: ' + pages;
   document.getElementById('stLines').textContent = 'Renglones: ' + lines.length;
@@ -670,7 +686,7 @@ function insertarLineaEnBlanco() {
 // ── Guardar / Cargar ──────────────────────────────────────────────────
 function guardarLocal() {
   var data = [];
-  document.querySelectorAll('.rt').forEach(function(el){ data.push({p:el.dataset.p, l:el.dataset.l, html:el.innerHTML, cls:el.className}); });
+  document.querySelectorAll('.rt').forEach(function(el){ data.push({p:el.dataset.p, l:el.dataset.l, html:el.innerHTML, cls:el.className, indent:el.getAttribute('data-indent')||'0'}); });
   try { localStorage.setItem('pj_data', JSON.stringify(data)); alert('Guardado correctamente.'); }
   catch(e) { alert('Error: '+e.message); }
 }
@@ -686,7 +702,12 @@ function cargarLocal() {
     renderPages(lines);
     data.forEach(function(d){
       var el = document.querySelector('[data-p="'+d.p+'"][data-l="'+d.l+'"]');
-      if (el) { el.innerHTML=d.html; el.className=d.cls; }
+      if (el) {
+          el.innerHTML = d.html;
+          el.className = d.cls;
+          if (d.indent && d.indent !== '0') el.setAttribute('data-indent', d.indent);
+          else el.removeAttribute('data-indent');
+        }
     });
     alert('Contenido recuperado.');
   } catch(e) { alert('Error: '+e.message); }
@@ -920,157 +941,47 @@ function leerJSON(event) {
   reader.readAsText(file);
 }
 
+// ── Encabezado primera página ─────────────────────────────────────────
+var hdrJuzgado = '', hdrExpediente = '';
+function escH(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function buildPageHeader() {
+  var div = document.createElement('div');
+  var empty = !hdrJuzgado && !hdrExpediente;
+  div.className = empty ? 'page-header ph-empty' : 'page-header';
+  div.id = 'pageHeader1';
+  var j = hdrJuzgado || '___________________________________';
+  var e = hdrExpediente || '________________';
+  div.innerHTML = '<div class="ph-row">' +
+    '<span><span class="ph-label">JUZGADO: </span><span class="ph-val">'+escH(j)+'</span></span>' +
+    '<span><span class="ph-label">EXPEDIENTE N°: </span><span class="ph-val">'+escH(e)+'</span></span>' +
+    '</div>';
+  return div;
+}
+function actualizarEncabezado() {
+  var old = document.getElementById('pageHeader1'); if (old) old.remove();
+  var pag1 = document.getElementById('pag-1'); if (pag1) pag1.appendChild(buildPageHeader());
+}
+function abrirEncabezado() {
+  document.getElementById('hdrJuzgado').value    = hdrJuzgado;
+  document.getElementById('hdrExpediente').value = hdrExpediente;
+  document.getElementById('hdrModal').classList.add('visible');
+  setTimeout(function(){ document.getElementById('hdrJuzgado').focus(); }, 50);
+}
+function cerrarEncabezado() { document.getElementById('hdrModal').classList.remove('visible'); }
+function cerrarFuera(ev) { if (ev.target===document.getElementById('hdrModal')) cerrarEncabezado(); }
+function aplicarEncabezado() {
+  hdrJuzgado    = document.getElementById('hdrJuzgado').value.trim();
+  hdrExpediente = document.getElementById('hdrExpediente').value.trim();
+  cerrarEncabezado(); actualizarEncabezado();
+  var btn = document.getElementById('btnHdr');
+  if (btn) btn.classList.toggle('active', !!(hdrJuzgado || hdrExpediente));
+}
+
 // ── Init ──────────────────────────────────────────────────────────────
-// ── Sangría ────────────────────────────────────────────────────────────
-function sangria(dir) {
-  var el = lastFocused;
-  if (!el || !el.classList.contains('rt')) return;
-  var cur = parseInt(el.getAttribute('data-indent') || '0');
-  var next = Math.max(0, Math.min(4, cur + dir));
-  if (next === 0) el.removeAttribute('data-indent');
-  else el.setAttribute('data-indent', next);
-  el.focus();
-}
-function toggleFirstIndent() {
-  var el = lastFocused;
-  if (!el || !el.classList.contains('rt')) return;
-  var on = el.classList.toggle('first-indent');
-  var btn = document.getElementById('btn-fi');
-  if (btn) btn.classList.toggle('active', on);
-  el.focus();
-}
-
-// ── Corrector ortográfico ───────────────────────────────────────────────
-var spellOn = true;
-function toggleSpell() {
-  spellOn = !spellOn;
-  document.querySelectorAll('.rt').forEach(function(el) {
-    el.spellcheck = spellOn;
-    el.setAttribute('spellcheck', spellOn ? 'true' : 'false');
-  });
-  var btn = document.getElementById('btnSpell');
-  if (btn) btn.classList.toggle('active', spellOn);
-}
-
-// ── Exportar a Word .docx ───────────────────────────────────────────────
-function exportarDocx() {
-  if (typeof JSZip === 'undefined') {
-    alert('La librería JSZip no cargó. Verificá tu conexión a internet.'); return;
-  }
-  var nombre = document.getElementById('pdfName').value.trim() || 'Escrito_Judicial';
-  var wrap = document.getElementById('pagesWrap');
-  var pages = wrap.querySelectorAll('.page');
-  if (!pages.length) { alert('No hay contenido para exportar.'); return; }
-
-  var LINE_SPACE = 636;
-  var fontName = (document.getElementById('selFont').value || 'Times New Roman').replace(/['"]/g,'').trim();
-  var fontSize  = parseInt(document.getElementById('selSize').value) || 12;
-  var fsSz = fontSize * 2;
-  var body = '';
-
-  pages.forEach(function(pageEl, pi) {
-    pageEl.querySelectorAll('.rt').forEach(function(el) {
-      var cls = el.className;
-      var jc = 'both';
-      if (cls.indexOf('cen') >= 0) jc = 'center';
-      else if (cls.indexOf('der') >= 0) jc = 'right';
-      else if (cls.indexOf('izq') >= 0) jc = 'left';
-      var indLevel = parseInt(el.getAttribute('data-indent') || '0');
-      var firstInd = el.classList.contains('first-indent') ? 720 : 0;
-      var indXml = (indLevel > 0 || firstInd > 0)
-        ? '<w:ind w:left="'+(indLevel*720)+'" w:firstLine="'+firstInd+'"/>' : '';
-      body += '<w:p><w:pPr>';
-      body += '<w:jc w:val="'+jc+'"/>';
-      body += '<w:spacing w:line="'+LINE_SPACE+'" w:lineRule="exact" w:before="0" w:after="0"/>';
-      body += indXml;
-      body += '<w:pBdr><w:bottom w:val="single" w:sz="2" w:space="0" w:color="CCCCCC"/></w:pBdr>';
-      body += '</w:pPr>';
-      body += htmlToRuns(el, fontName, fsSz);
-      body += '</w:p>';
-    });
-    if (pi < pages.length - 1) {
-      body += '<w:p><w:pPr><w:spacing w:line="20" w:lineRule="exact" w:before="0" w:after="0"/>';
-      body += '<w:sectPr><w:type w:val="nextPage"/>';
-      body += '<w:pgSz w:w="12240" w:h="20160"/>';
-      body += '<w:pgMar w:top="2160" w:right="1080" w:bottom="1440" w:left="1800" w:header="720" w:footer="720" w:gutter="0"/>';
-      body += '</w:sectPr></w:pPr></w:p>';
-    }
-  });
-
-  var CT = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
-    + '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
-    + '<Default Extension="xml" ContentType="application/xml"/>'
-    + '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'
-    + '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>'
-    + '</Types>';
-  var MRELS = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-    + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>'
-    + '</Relationships>';
-  var DRELS = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-    + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
-    + '</Relationships>';
-  var STYLES = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    + '<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
-    + '<w:docDefaults><w:rPrDefault><w:rPr>'
-    + '<w:rFonts w:ascii="'+fontName+'" w:hAnsi="'+fontName+'" w:cs="'+fontName+'"/>'
-    + '<w:sz w:val="'+fsSz+'"/><w:szCs w:val="'+fsSz+'"/>'
-    + '</w:rPr></w:rPrDefault>'
-    + '<w:pPrDefault><w:pPr><w:spacing w:after="0" w:before="0"/></w:pPr></w:pPrDefault>'
-    + '</w:docDefaults>'
-    + '<w:style w:type="paragraph" w:styleId="Normal" w:default="1"><w:name w:val="Normal"/>'
-    + '<w:pPr><w:spacing w:line="'+LINE_SPACE+'" w:lineRule="exact" w:before="0" w:after="0"/></w:pPr>'
-    + '<w:rPr><w:rFonts w:ascii="'+fontName+'" w:hAnsi="'+fontName+'"/>'
-    + '<w:sz w:val="'+fsSz+'"/></w:rPr></w:style>'
-    + '</w:styles>';
-  var DOC = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    + '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"'
-    + ' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
-    + '<w:body>' + body
-    + '<w:sectPr><w:pgSz w:w="12240" w:h="20160"/>'
-    + '<w:pgMar w:top="2160" w:right="1080" w:bottom="1440" w:left="1800" w:header="720" w:footer="720" w:gutter="0"/>'
-    + '</w:sectPr></w:body></w:document>';
-
-  var zip = new JSZip();
-  zip.file('[Content_Types].xml', CT);
-  zip.file('_rels/.rels', MRELS);
-  zip.file('word/document.xml', DOC);
-  zip.file('word/_rels/document.xml.rels', DRELS);
-  zip.file('word/styles.xml', STYLES);
-  zip.generateAsync({ type:'blob', mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document', compression:'DEFLATE', compressionOptions:{level:6} })
-  .then(function(blob){ saveAs(blob, nombre+'.docx'); })
-  .catch(function(e){ alert('Error al generar: '+e.message); });
-}
-
-function htmlToRuns(el, fontName, fsSz) {
-  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-  function nodeToRuns(node, b, i, u, col) {
-    if (node.nodeType === 3) {
-      var txt = node.textContent; if (!txt) return '';
-      var rpr = '<w:rFonts w:ascii="'+fontName+'" w:hAnsi="'+fontName+'"/><w:sz w:val="'+fsSz+'"/>';
-      if (b) rpr += '<w:b/>'; if (i) rpr += '<w:i/>'; if (u) rpr += '<w:u w:val="single"/>';
-      if (col && col !== 'rgb(0, 0, 0)' && col !== '#000000') {
-        var hex = col.replace('#',''); if (hex.length===6) rpr += '<w:color w:val="'+hex+'"/>';
-      }
-      return '<w:r><w:rPr>'+rpr+'</w:rPr><w:t xml:space="preserve">'+esc(txt)+'</w:t></w:r>';
-    } else if (node.nodeType === 1) {
-      var tag = node.tagName.toLowerCase();
-      var nb = b||(tag==='b'||tag==='strong'), ni = i||(tag==='i'||tag==='em'), nu = u||(tag==='u');
-      var nc = col; var st = node.style;
-      if (st&&st.color) nc=st.color; if (st&&st.fontWeight==='bold') nb=true;
-      if (st&&st.fontStyle==='italic') ni=true; if (st&&st.textDecoration==='underline') nu=true;
-      var out=''; node.childNodes.forEach(function(ch){ out+=nodeToRuns(ch,nb,ni,nu,nc); }); return out;
-    } return '';
-  }
-  var runs=''; el.childNodes.forEach(function(ch){ runs+=nodeToRuns(ch,false,false,false,null); });
-  if (!runs) runs='<w:r><w:rPr><w:rFonts w:ascii="'+fontName+'" w:hAnsi="'+fontName+'"/><w:sz w:val="'+fsSz+'"/></w:rPr><w:t></w:t></w:r>';
-  return runs;
-}
-
 actualizarCtxFont();
 renderPages([]);
+document.getElementById('hdrJuzgado').addEventListener('keydown', function(ev){ if(ev.key==='Enter') document.getElementById('hdrExpediente').focus(); });
+document.getElementById('hdrExpediente').addEventListener('keydown', function(ev){ if(ev.key==='Enter') aplicarEncabezado(); });
 </script>
 </body>
 </html>

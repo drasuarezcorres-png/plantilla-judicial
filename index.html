@@ -345,9 +345,10 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
   <label>Pega todo el texto aqui &mdash; se distribuye automaticamente en todas las paginas</label>
   <textarea id="txtInput" placeholder="Ctrl+V para pegar..."></textarea>
   <div class="paste-actions">
-    <button class="rb primary" style="height:30px;font-size:.82rem" onclick="procesarTexto()">&#10004; Distribuir en plantilla</button>
+    <button class="rb primary" style="height:30px;font-size:.82rem" onclick="procesarTexto(false)">&#10004; Reemplazar todo</button>
+    <button class="rb" style="height:30px;font-size:.82rem;background:#1a6632;color:#fff" onclick="procesarTexto(true)">&#43; Agregar al final</button>
     <button class="rb danger"  style="height:30px;font-size:.82rem" onclick="togglePaste()">Cancelar</button>
-    <span style="font-size:.72rem;color:#888;font-family:Arial,sans-serif">26 renglones por pagina &middot; hasta 40 paginas</span>
+    <span style="font-size:.72rem;color:#888;font-family:Arial,sans-serif">Reemplazar = borra todo · Agregar = continúa desde el último renglón</span>
   </div>
 </div>
 

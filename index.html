@@ -78,6 +78,15 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
 }
 .find-bar{display:none;position:fixed;top:120px;right:20px;z-index:200;background:#fff;border:1px solid #c8b898;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.2);padding:.65rem .9rem;font-family:Arial,sans-serif;min-width:280px}
 .find-bar.visible{display:block}
+/* Modal instrucción de impresión */
+.print-modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);z-index:600;align-items:center;justify-content:center}
+.print-modal.visible{display:flex}
+.print-box{background:#fff;border-radius:10px;padding:1.75rem 2rem;max-width:420px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.25);font-family:Arial,sans-serif}
+.print-box h3{font-size:1rem;font-weight:600;color:#1a2744;margin-bottom:1rem}
+.print-box ol{padding-left:1.2rem;font-size:.85rem;color:#444;line-height:2}
+.print-box ol li{margin-bottom:.2rem}
+.print-box .print-actions{display:flex;gap:.6rem;justify-content:flex-end;margin-top:1.25rem}
+.print-key{display:inline-block;background:#f0ede8;border:1px solid #c8b898;border-radius:3px;padding:1px 7px;font-family:monospace;font-size:.8rem;color:#333}
 .find-bar label{font-size:.72rem;font-weight:700;color:#555;display:block;margin-bottom:.3rem}
 .find-bar input{width:100%;height:28px;border:1px solid #c8b898;border-radius:3px;padding:0 8px;font-size:.82rem;outline:none;margin-bottom:.4rem}
 .find-bar input:focus{border-color:#1a2744}
@@ -140,17 +149,7 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
   .rt.der,.rt.der:focus{text-align:right!important;text-align-last:right!important}
   .rt.overflow-warn{border-bottom:1px solid #ccc !important;background:none !important}
   .rn{font-size:9pt;color:#aaa;line-height:calc((14in - 2.5in)/26);width:22pt}
-  .hoja{
-    display:block !important;
-    position:absolute;
-    bottom:18pt;
-    right:0;
-    left:0;
-    text-align:center;
-    font-size:9pt;
-    color:#555 !important;
-    font-family:'Times New Roman',serif;
-  }
+  .hoja{display:none !important}
   .hl-find{background:none!important;color:inherit!important}
 }
 </style>
@@ -346,6 +345,21 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
     <div class="hdr-actions">
       <button class="rb" onclick="cerrarEncabezado()" style="height:32px;font-size:.82rem">Cancelar</button>
       <button class="rb primary" onclick="aplicarEncabezado()" style="height:32px;font-size:.82rem">&#10004; Aplicar</button>
+    </div>
+  </div>
+</div>
+<div class="print-modal" id="printModal">
+  <div class="print-box">
+    <h3>🖨 Antes de guardar el PDF</h3>
+    <ol>
+      <li>En el diálogo que se abre, buscá <strong>"Más opciones"</strong> o <strong>"Configuración"</strong></li>
+      <li>Desmarcá la opción <strong>"Encabezados y pies de página"</strong></li>
+      <li>Seleccioná destino <strong>"Guardar como PDF"</strong></li>
+      <li>Hacé clic en <strong>Guardar</strong></li>
+    </ol>
+    <div class="print-actions">
+      <button class="rb" onclick="cerrarPrintModal()" style="height:32px;font-size:.82rem">Cancelar</button>
+      <button class="rb primary" onclick="confirmarImprimir()" style="height:32px;font-size:.82rem">✔ Entendido — Imprimir</button>
     </div>
   </div>
 </div>
@@ -755,14 +769,22 @@ document.addEventListener('keydown', function(ev) {
 });
 
 // ── Imprimir con nombre personalizado ────────────────────────────────
+var _nombrePDF = '';
 function imprimirPDF() {
-  var nombre = document.getElementById('pdfName').value.trim();
+  _nombrePDF = document.getElementById('pdfName').value.trim();
+  document.getElementById('printModal').classList.add('visible');
+}
+function cerrarPrintModal() {
+  document.getElementById('printModal').classList.remove('visible');
+}
+function confirmarImprimir() {
+  cerrarPrintModal();
   var tituloOriginal = document.title;
-  // Cambiar título solo para el nombre del archivo PDF — no afecta el contenido impreso
-  if (nombre) document.title = nombre;
-  window.print();
-  // Restaurar título
-  setTimeout(function() { document.title = tituloOriginal; }, 1500);
+  if (_nombrePDF) document.title = _nombrePDF;
+  setTimeout(function() {
+    window.print();
+    setTimeout(function() { document.title = tituloOriginal; }, 1500);
+  }, 100);
 }
 
 // ── Guías, Reflow e Importación/Exportación ───────────────────────────
@@ -928,7 +950,10 @@ function exportarDocx(esBorrador) {
   pages.forEach(function(pageEl, pi) {
     pageEl.querySelectorAll('.rt').forEach(function(el) {
       var cls = el.className;
-      var jc  = 'both';
+      // 'distribute' fuerza justificación en cada línea individual (a diferencia de
+      // 'both' que deja la última línea sin justificar). Necesario porque cada
+      // renglón es un párrafo independiente en el docx.
+      var jc  = 'distribute';
       if (cls.indexOf('cen') >= 0) jc = 'center';
       else if (cls.indexOf('der') >= 0) jc = 'right';
       else if (cls.indexOf('izq') >= 0) jc = 'left';
@@ -976,13 +1001,13 @@ function exportarDocx(esBorrador) {
     +'<w:sz w:val="'+fsSz+'"/><w:szCs w:val="'+fsSz+'"/>'
     +'</w:rPr></w:rPrDefault>'
     +'<w:pPrDefault><w:pPr>'
-    +'<w:jc w:val="both"/>'
+    +'<w:jc w:val="distribute"/>'
     +'<w:spacing w:line="'+LINE_SPACE+'" w:lineRule="exact" w:before="0" w:after="0"/>'
     +'</w:pPr></w:pPrDefault>'
     +'</w:docDefaults>'
     +'<w:style w:type="paragraph" w:styleId="Normal" w:default="1"><w:name w:val="Normal"/>'
     +'<w:pPr>'
-    +'<w:jc w:val="both"/>'
+    +'<w:jc w:val="distribute"/>'
     +'<w:spacing w:line="'+LINE_SPACE+'" w:lineRule="exact" w:before="0" w:after="0"/>'
     +'</w:pPr>'
     +'<w:rPr><w:rFonts w:ascii="'+fontName+'" w:hAnsi="'+fontName+'"/>'

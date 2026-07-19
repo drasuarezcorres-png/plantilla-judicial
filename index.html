@@ -342,12 +342,12 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
 </div>
 
 <div class="paste-zone" id="pasteZone">
-  <label>Pega todo el texto aqui &mdash; se distribuye automaticamente en todas las paginas</label>
+  <label>Pega el texto aqui (Ctrl+V) y elegí Reemplazar o Agregar. Cerrá cuando termines.</label>
   <textarea id="txtInput" placeholder="Ctrl+V para pegar..."></textarea>
   <div class="paste-actions">
     <button class="rb primary" style="height:30px;font-size:.82rem" onclick="procesarTexto(false)">&#10004; Reemplazar todo</button>
     <button class="rb" style="height:30px;font-size:.82rem;background:#1a6632;color:#fff" onclick="procesarTexto(true)">&#43; Agregar al final</button>
-    <button class="rb danger"  style="height:30px;font-size:.82rem" onclick="togglePaste()">Cancelar</button>
+    <button class="rb danger"  style="height:30px;font-size:.82rem" onclick="togglePaste()">&#10005; Cerrar</button>
     <span style="font-size:.72rem;color:#888;font-family:Arial,sans-serif">Reemplazar = borra todo · Agregar = continúa desde el último renglón</span>
   </div>
 </div>
@@ -583,19 +583,49 @@ function togglePaste() {
   if (z.classList.contains('visible')) z.classList.remove('visible');
   else { z.classList.add('visible'); document.getElementById('txtInput').focus(); }
 }
-function procesarTexto() {
+// procesarTexto(append) definida en la seccion de exportacion
+
+// ── Pegar texto (reemplazar o agregar al final) ────────────────────────
+function procesarTexto(append) {
   var raw = document.getElementById('txtInput').value;
-  if (!raw.trim()) { alert('No hay texto.'); return; }
+  if (!raw.trim()) { alert('No hay texto para procesar.'); return; }
   actualizarCtxFont();
   var paras = raw.split(/\r?\n/).map(function(p) {
     return { text: p, align: 'jus' };
   });
-  var lines = paragraphsToLines(paras);
-  renderPages(lines);
-  togglePaste();
-  if (lines.length >= MAX_LINES) alert('Texto excede 40 paginas. Se muestran los primeros 1040 renglones.');
+  var nuevasLines = paragraphsToLines(paras);
+
+  if (append) {
+    var wrap  = document.getElementById('pagesWrap');
+    var todos = wrap.querySelectorAll('.rt');
+    var lastIdx = -1;
+    todos.forEach(function(el, i) {
+      if (el.textContent.replace(/\u00a0/g,'').trim() !== '') lastIdx = i;
+    });
+    var startIdx = lastIdx + 1;
+    var necesarios = startIdx + nuevasLines.length;
+    while (necesarios > todos.length && todos.length < MAX_LINES) {
+      agregarPagina();
+      todos = wrap.querySelectorAll('.rt');
+    }
+    nuevasLines.forEach(function(lineObj, i) {
+      var el = todos[startIdx + i];
+      if (!el) return;
+      el.textContent = lineObj.text || '';
+      el.className   = lineObj.cen ? 'rt cen' : lineObj.der ? 'rt der' : lineObj.izq ? 'rt izq' : 'rt';
+    });
+    if (startIdx + nuevasLines.length > MAX_LINES) {
+      alert('Texto excede el límite de 40 páginas.');
+    }
+  } else {
+    var lines = paragraphsToLines(paras);
+    renderPages(lines);
+    if (lines.length >= MAX_LINES) alert('Texto excede 40 paginas.');
+  }
+  // Limpiar textarea pero mantener zona abierta para la siguiente parte
+  document.getElementById('txtInput').value = '';
+  document.getElementById('txtInput').focus();
 }
-document.getElementById('txtInput').addEventListener('paste', function(){ setTimeout(procesarTexto, 300); });
 
 // ── Formato ───────────────────────────────────────────────────────────
 function fmt(cmd) {

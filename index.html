@@ -58,6 +58,25 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
 .rt.cen{text-align:center!important;text-align-last:center!important}
 .rt.der{text-align:right!important;text-align-last:right!important}
 .hoja{position:absolute;bottom:22px;right:52px;left:52px;text-align:center;font-size:9pt;color:#bbb;font-family:Arial,sans-serif}
+.folio-num{
+  position:absolute;
+  top:10px;right:52px;
+  font-family:'Times New Roman',serif;
+  font-size:11pt;
+  font-weight:500;
+  color:#222;
+  display:none;
+}
+.folio-num.visible{display:block}
+@media print{
+  .folio-num.visible{
+    display:block !important;
+    position:absolute;
+    top:10px;right:0;
+    font-size:11pt;
+    color:#000;
+  }
+}
 .page-header{position:absolute;top:10px;left:81px;right:52px;font-family:'Times New Roman',serif;padding-bottom:5px;border-bottom:1px solid #333}
 .page-header .ph-row{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap}
 .page-header .ph-label{font-size:9pt;color:#555}
@@ -228,6 +247,14 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
       </div>
       <span class="rgroup-label">Editar</span>
     </div>
+    <div class="rsep"></div>
+    <div class="rgroup-wrap">
+      <div class="rgroup">
+        <button class="rb primary" id="btnFolios" onclick="numerarPaginas()" title="Agrega número de folio en el encabezado de cada página">&#9839; Numerar folios</button>
+        <button class="rb" onclick="quitarNumeracion()" title="Quita la numeración">&#10005; Quitar</button>
+      </div>
+      <span class="rgroup-label">Folios</span>
+    </div>
   </div>
   <div class="ribbon-panel" id="tab-insertar">
     <div class="rgroup-wrap">
@@ -243,14 +270,6 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
         <button class="rb" onclick="insertarLineaEnBlanco()" title="Insertar linea en blanco en posicion actual">&#9135; Linea en blanco</button>
       </div>
       <span class="rgroup-label">Insertar</span>
-    </div>
-    <div class="rsep"></div>
-    <div class="rgroup-wrap">
-      <div class="rgroup">
-        <button class="rb primary" onclick="numerarPaginas()" title="Pone el número de folio en el renglón 1 de cada página">&#9839; Numerar folios</button>
-        <button class="rb" onclick="quitarNumeracion()" title="Quita la numeración de folios">&#10005; Quitar números</button>
-      </div>
-      <span class="rgroup-label">Folios</span>
     </div>
   </div>
   <div class="ribbon-panel" id="tab-vista">
@@ -536,7 +555,11 @@ function renderPages(lines) {
       ct.appendChild(crearRenglon(p, l, idx < lines.length ? lines[idx] : { text:'', izq:true }));
     }
     var hj = document.createElement('div'); hj.className = 'hoja'; hj.textContent = 'Hoja '+p;
-    pe.appendChild(ct); pe.appendChild(hj);
+    var fn = document.createElement('div');
+    fn.className = foliosVisibles ? 'folio-num visible' : 'folio-num';
+    fn.setAttribute('data-folio', p);
+    fn.textContent = String(p);
+    pe.appendChild(ct); pe.appendChild(hj); pe.appendChild(fn);
     if (p === 1) pe.appendChild(buildPageHeader());
     wrap.appendChild(pe);
   }
@@ -690,7 +713,11 @@ function agregarPagina() {
   var ct = document.createElement('div'); ct.className='page-content';
   for (var l=1; l<=LINES; l++) ct.appendChild(crearRenglon(p, l, {text:'', izq:true}));
   var hj = document.createElement('div'); hj.className='hoja'; hj.textContent='Hoja '+p;
-  pe.appendChild(ct); pe.appendChild(hj); wrap.appendChild(pe);
+  var fn2 = document.createElement('div');
+  fn2.className = foliosVisibles ? 'folio-num visible' : 'folio-num';
+  fn2.setAttribute('data-folio', p);
+  fn2.textContent = String(p);
+  pe.appendChild(ct); pe.appendChild(hj); pe.appendChild(fn2); wrap.appendChild(pe);
   document.getElementById('stPages').textContent = 'Paginas: '+p;
   document.getElementById('goPage').max = p;
   pe.scrollIntoView({behavior:'smooth'});
@@ -1072,41 +1099,38 @@ function htmlToRuns(el, fontName, fsSz) {
   return runs;
 }
 
-// ── Numeración de folios ───────────────────────────────────────────────
+// ── Numeración de folios en encabezado ────────────────────────────────
+var foliosVisibles = false;
+
 function numerarPaginas() {
+  foliosVisibles = true;
   var wrap  = document.getElementById('pagesWrap');
   var pages = wrap.querySelectorAll('.page');
   if (!pages.length) { alert('No hay páginas para numerar.'); return; }
+  // Crear o actualizar div folio-num en cada página
   pages.forEach(function(pageEl, pi) {
-    // Buscar el renglón 1 de esta página
-    var p   = pi + 1;
-    var r1  = pageEl.querySelector('[data-p="'+p+'"][data-l="1"]');
-    if (!r1) return;
-    // Solo poner el número si el renglón está vacío o ya tiene un número anterior
-    var contenido = r1.textContent.replace(/ /g,'').trim();
-    var esNumero  = /^\d+$/.test(contenido);
-    if (contenido === '' || esNumero) {
-      r1.textContent = String(p);
-      r1.className   = 'rt cen';   // centrado
+    var p  = pi + 1;
+    var fn = pageEl.querySelector('.folio-num');
+    if (!fn) {
+      fn = document.createElement('div');
+      fn.setAttribute('data-folio', p);
+      pageEl.appendChild(fn);
     }
+    fn.className  = 'folio-num visible';
+    fn.textContent = String(p);
   });
-  alert('Folios numerados: ' + pages.length + ' páginas.');
+  // Activar botón
+  var btn = document.getElementById('btnFolios');
+  if (btn) btn.classList.add('active');
 }
 
 function quitarNumeracion() {
-  if (!confirm('¿Quitar los números de folio del renglón 1 de cada página?')) return;
-  var wrap  = document.getElementById('pagesWrap');
-  var pages = wrap.querySelectorAll('.page');
-  pages.forEach(function(pageEl, pi) {
-    var p  = pi + 1;
-    var r1 = pageEl.querySelector('[data-p="'+p+'"][data-l="1"]');
-    if (!r1) return;
-    var contenido = r1.textContent.replace(/ /g,'').trim();
-    if (/^\d+$/.test(contenido)) {
-      r1.textContent = '';
-      r1.className   = 'rt izq';
-    }
+  foliosVisibles = false;
+  document.querySelectorAll('.folio-num').forEach(function(fn){
+    fn.classList.remove('visible');
   });
+  var btn = document.getElementById('btnFolios');
+  if (btn) btn.classList.remove('active');
 }
 
 actualizarCtxFont();

@@ -116,7 +116,17 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
 }
 
 @media print{
-  @page{size:8.5in 14in;margin:1.5in 0.75in 1in 1.25in}
+  @page{
+    size:8.5in 14in;
+    margin:1.5in 0.75in 1in 1.25in;
+    /* Suprimir encabezado y pie automático del navegador */
+    @top-center { content: none; }
+    @top-left   { content: none; }
+    @top-right  { content: none; }
+    @bottom-center { content: none; }
+    @bottom-left   { content: none; }
+    @bottom-right  { content: none; }
+  }
   body{background:none;padding:0}
   .title-bar,.ribbon,.paste-zone,.status-bar,.find-bar{display:none!important}
   .pages-wrap{padding:0;gap:0;display:block}
@@ -144,6 +154,8 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
   .hl-find{background:none!important;color:inherit!important}
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </head>
 <body>
 
@@ -281,6 +293,7 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
             style="height:26px;width:210px;border:1px solid #c8b898;border-radius:3px;padding:0 8px;font-family:Arial,sans-serif;font-size:.78rem;outline:none"
             onfocus="this.style.borderColor='#1a2744'" onblur="this.style.borderColor='#c8b898'">
           <button class="rb gold" onclick="imprimirPDF()" title="Imprimir o guardar como PDF">&#128424; PDF</button>
+          <button class="rb primary" onclick="exportarDocx()" title="Exportar como Word .docx">&#128462; Word .docx</button>
         </div>
       </div>
       <span class="rgroup-label">Exportar PDF</span>
@@ -746,16 +759,12 @@ document.addEventListener('keydown', function(ev) {
 // ── Imprimir con nombre personalizado ────────────────────────────────
 function imprimirPDF() {
   var nombre = document.getElementById('pdfName').value.trim();
-  if (nombre) {
-    // Cambiar el título del documento temporalmente → el navegador lo usa como nombre del PDF
-    var tituloOriginal = document.title;
-    document.title = nombre;
-    window.print();
-    // Restaurar título después de imprimir
-    setTimeout(function() { document.title = tituloOriginal; }, 2000);
-  } else {
-    window.print();
-  }
+  var tituloOriginal = document.title;
+  // Cambiar título solo para el nombre del archivo PDF — no afecta el contenido impreso
+  if (nombre) document.title = nombre;
+  window.print();
+  // Restaurar título
+  setTimeout(function() { document.title = tituloOriginal; }, 1500);
 }
 
 // ── Guías, Reflow e Importación/Exportación ───────────────────────────
@@ -867,21 +876,24 @@ function descargarJSON() {
   };
   document.querySelectorAll('.rt').forEach(function(el){
     data.lines.push({
-      p: el.dataset.p,
-      l: el.dataset.l,
-      html: el.innerHTML,
-      cls: el.className
+      p:      el.dataset.p,
+      l:      el.dataset.l,
+      html:   el.innerHTML,
+      cls:    el.className,
+      indent: el.getAttribute('data-indent') || '0'
     });
   });
   var jsonStr = JSON.stringify(data, null, 2);
-  var blob = new Blob([jsonStr], { type: 'application/json' });
-  var url = URL.createObjectURL(blob);
+  // Usar data: URI para garantizar extensión .json independientemente del navegador
+  var dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(jsonStr);
   var a = document.createElement('a');
-  var name = document.getElementById('pdfName').value.trim() || 'borrador_judicial';
+  var name = (document.getElementById('pdfName').value.trim() || 'borrador_judicial')
+             .replace(/[^a-zA-Z0-9_\-À-ɏ]/g, '_');
   a.download = name + '.json';
-  a.href = url;
+  a.href = dataUri;
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  document.body.removeChild(a);
 }
 
 function subirJSON() {
@@ -978,6 +990,131 @@ function aplicarEncabezado() {
 }
 
 // ── Init ──────────────────────────────────────────────────────────────
+// ── Exportar a Word .docx ──────────────────────────────────────────────
+function exportarDocx() {
+  if (typeof JSZip === 'undefined') {
+    alert('La libreria JSZip no cargo. Verifica tu conexion a internet.'); return;
+  }
+  var nombre = (document.getElementById('pdfName').value.trim() || 'Escrito_Judicial')
+               .replace(/[^a-zA-Z0-9_À-ɏ\s\-]/g,'_');
+  var wrap  = document.getElementById('pagesWrap');
+  var pages = wrap.querySelectorAll('.page');
+  if (!pages.length) { alert('No hay contenido para exportar.'); return; }
+
+  var LINE_SPACE = 636;
+  var fontName = (document.getElementById('selFont').value || 'Times New Roman').replace(/['"]/g,'').trim();
+  var fontSize  = parseInt(document.getElementById('selSize').value) || 12;
+  var fsSz = fontSize * 2;
+  var body = '';
+
+  pages.forEach(function(pageEl, pi) {
+    pageEl.querySelectorAll('.rt').forEach(function(el) {
+      var cls = el.className;
+      var jc  = 'both';
+      if (cls.indexOf('cen') >= 0) jc = 'center';
+      else if (cls.indexOf('der') >= 0) jc = 'right';
+      else if (cls.indexOf('izq') >= 0) jc = 'left';
+      var indLevel = parseInt(el.getAttribute('data-indent') || '0');
+      var firstInd = el.classList.contains('first-indent') ? 720 : 0;
+      var indXml   = (indLevel > 0 || firstInd > 0)
+        ? '<w:ind w:left="'+(indLevel*720)+'" w:firstLine="'+firstInd+'"/>' : '';
+      body += '<w:p><w:pPr>';
+      body += '<w:jc w:val="'+jc+'"/>';
+      body += '<w:spacing w:line="'+LINE_SPACE+'" w:lineRule="exact" w:before="0" w:after="0"/>';
+      body += indXml;
+      body += '<w:pBdr><w:bottom w:val="single" w:sz="2" w:space="0" w:color="CCCCCC"/></w:pBdr>';
+      body += '</w:pPr>';
+      body += htmlToRuns(el, fontName, fsSz);
+      body += '</w:p>';
+    });
+    if (pi < pages.length - 1) {
+      body += '<w:p><w:pPr><w:spacing w:line="20" w:lineRule="exact" w:before="0" w:after="0"/>';
+      body += '<w:sectPr><w:type w:val="nextPage"/>';
+      body += '<w:pgSz w:w="12240" w:h="20160"/>';
+      body += '<w:pgMar w:top="2160" w:right="1080" w:bottom="1440" w:left="1800" w:header="720" w:footer="720" w:gutter="0"/>';
+      body += '</w:sectPr></w:pPr></w:p>';
+    }
+  });
+
+  var CT = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+    +'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+    +'<Default Extension="xml" ContentType="application/xml"/>'
+    +'<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'
+    +'<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>'
+    +'</Types>';
+  var MRELS = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    +'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>'
+    +'</Relationships>';
+  var DRELS = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    +'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
+    +'</Relationships>';
+  var STYLES = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+    +'<w:docDefaults><w:rPrDefault><w:rPr>'
+    +'<w:rFonts w:ascii="'+fontName+'" w:hAnsi="'+fontName+'" w:cs="'+fontName+'"/>'
+    +'<w:sz w:val="'+fsSz+'"/><w:szCs w:val="'+fsSz+'"/>'
+    +'</w:rPr></w:rPrDefault>'
+    +'<w:pPrDefault><w:pPr><w:spacing w:after="0" w:before="0"/></w:pPr></w:pPrDefault>'
+    +'</w:docDefaults>'
+    +'<w:style w:type="paragraph" w:styleId="Normal" w:default="1"><w:name w:val="Normal"/>'
+    +'<w:pPr><w:spacing w:line="'+LINE_SPACE+'" w:lineRule="exact" w:before="0" w:after="0"/></w:pPr>'
+    +'<w:rPr><w:rFonts w:ascii="'+fontName+'" w:hAnsi="'+fontName+'"/>'
+    +'<w:sz w:val="'+fsSz+'"/></w:rPr></w:style>'
+    +'</w:styles>';
+  var DOC = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"'
+    +' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+    +'<w:body>'+body
+    +'<w:sectPr><w:pgSz w:w="12240" w:h="20160"/>'
+    +'<w:pgMar w:top="2160" w:right="1080" w:bottom="1440" w:left="1800" w:header="720" w:footer="720" w:gutter="0"/>'
+    +'</w:sectPr></w:body></w:document>';
+
+  var zip = new JSZip();
+  zip.file('[Content_Types].xml', CT);
+  zip.file('_rels/.rels', MRELS);
+  zip.file('word/document.xml', DOC);
+  zip.file('word/_rels/document.xml.rels', DRELS);
+  zip.file('word/styles.xml', STYLES);
+  zip.generateAsync({
+    type:'blob',
+    mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    compression:'DEFLATE',
+    compressionOptions:{level:6}
+  }).then(function(blob){
+    saveAs(blob, nombre+'.docx');
+  }).catch(function(e){ alert('Error al generar: '+e.message); });
+}
+
+function htmlToRuns(el, fontName, fsSz) {
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function nodeToRuns(node, b, i, u, col) {
+    if (node.nodeType === 3) {
+      var txt = node.textContent; if (!txt) return '';
+      var rpr = '<w:rFonts w:ascii="'+fontName+'" w:hAnsi="'+fontName+'"/><w:sz w:val="'+fsSz+'"/>';
+      if (b) rpr += '<w:b/>'; if (i) rpr += '<w:i/>'; if (u) rpr += '<w:u w:val="single"/>';
+      if (col && col !== 'rgb(0, 0, 0)' && col !== '#000000') {
+        var hex = col.replace('#',''); if (hex.length===6) rpr += '<w:color w:val="'+hex+'"/>';
+      }
+      return '<w:r><w:rPr>'+rpr+'</w:rPr><w:t xml:space="preserve">'+esc(txt)+'</w:t></w:r>';
+    } else if (node.nodeType === 1) {
+      var tag = node.tagName.toLowerCase();
+      var nb = b||(tag==='b'||tag==='strong'), ni = i||(tag==='i'||tag==='em'), nu = u||(tag==='u');
+      var nc = col; var st = node.style;
+      if (st&&st.color) nc=st.color;
+      if (st&&st.fontWeight==='bold') nb=true;
+      if (st&&st.fontStyle==='italic') ni=true;
+      if (st&&st.textDecoration==='underline') nu=true;
+      var out=''; node.childNodes.forEach(function(ch){ out+=nodeToRuns(ch,nb,ni,nu,nc); }); return out;
+    } return '';
+  }
+  var runs=''; el.childNodes.forEach(function(ch){ runs+=nodeToRuns(ch,false,false,false,null); });
+  if (!runs) runs='<w:r><w:rPr><w:rFonts w:ascii="'+fontName+'" w:hAnsi="'+fontName+'"/><w:sz w:val="'+fsSz+'"/></w:rPr><w:t></w:t></w:r>';
+  return runs;
+}
+
 actualizarCtxFont();
 renderPages([]);
 document.getElementById('hdrJuzgado').addEventListener('keydown', function(ev){ if(ev.key==='Enter') document.getElementById('hdrExpediente').focus(); });

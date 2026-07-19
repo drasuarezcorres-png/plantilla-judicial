@@ -244,6 +244,14 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
       </div>
       <span class="rgroup-label">Insertar</span>
     </div>
+    <div class="rsep"></div>
+    <div class="rgroup-wrap">
+      <div class="rgroup">
+        <button class="rb primary" onclick="numerarPaginas()" title="Pone el número de folio en el renglón 1 de cada página">&#9839; Numerar folios</button>
+        <button class="rb" onclick="quitarNumeracion()" title="Quita la numeración de folios">&#10005; Quitar números</button>
+      </div>
+      <span class="rgroup-label">Folios</span>
+    </div>
   </div>
   <div class="ribbon-panel" id="tab-vista">
     <div class="rgroup-wrap">
@@ -1062,6 +1070,43 @@ function htmlToRuns(el, fontName, fsSz) {
   var runs=''; el.childNodes.forEach(function(ch){ runs+=nodeToRuns(ch,false,false,false,null); });
   if (!runs) runs='<w:r><w:rPr><w:rFonts w:ascii="'+fontName+'" w:hAnsi="'+fontName+'"/><w:sz w:val="'+fsSz+'"/></w:rPr><w:t></w:t></w:r>';
   return runs;
+}
+
+// ── Numeración de folios ───────────────────────────────────────────────
+function numerarPaginas() {
+  var wrap  = document.getElementById('pagesWrap');
+  var pages = wrap.querySelectorAll('.page');
+  if (!pages.length) { alert('No hay páginas para numerar.'); return; }
+  pages.forEach(function(pageEl, pi) {
+    // Buscar el renglón 1 de esta página
+    var p   = pi + 1;
+    var r1  = pageEl.querySelector('[data-p="'+p+'"][data-l="1"]');
+    if (!r1) return;
+    // Solo poner el número si el renglón está vacío o ya tiene un número anterior
+    var contenido = r1.textContent.replace(/ /g,'').trim();
+    var esNumero  = /^\d+$/.test(contenido);
+    if (contenido === '' || esNumero) {
+      r1.textContent = String(p);
+      r1.className   = 'rt cen';   // centrado
+    }
+  });
+  alert('Folios numerados: ' + pages.length + ' páginas.');
+}
+
+function quitarNumeracion() {
+  if (!confirm('¿Quitar los números de folio del renglón 1 de cada página?')) return;
+  var wrap  = document.getElementById('pagesWrap');
+  var pages = wrap.querySelectorAll('.page');
+  pages.forEach(function(pageEl, pi) {
+    var p  = pi + 1;
+    var r1 = pageEl.querySelector('[data-p="'+p+'"][data-l="1"]');
+    if (!r1) return;
+    var contenido = r1.textContent.replace(/ /g,'').trim();
+    if (/^\d+$/.test(contenido)) {
+      r1.textContent = '';
+      r1.className   = 'rt izq';
+    }
+  });
 }
 
 actualizarCtxFont();

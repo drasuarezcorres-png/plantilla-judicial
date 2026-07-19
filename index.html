@@ -278,9 +278,7 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
       <div class="rgroup">
         <button class="rb primary" onclick="guardarLocal()">&#128190; Guardar</button>
         <button class="rb" onclick="cargarLocal()">&#128194; Recuperar</button>
-        <button class="rb" onclick="descargarJSON()" title="Descargar como archivo borrador (.json)">📥 Descargar borrador</button>
-        <button class="rb" onclick="subirJSON()" title="Cargar un archivo borrador (.json)">📤 Cargar borrador</button>
-        <input type="file" id="fileInput" accept=".json" style="display:none" onchange="leerJSON(event)">
+        <button class="rb" onclick="descargarBorrador()" title="Descargar borrador como Word .docx para editar en cualquier PC">📥 Borrador Word</button>
       </div>
       <span class="rgroup-label">Guardar y Archivo</span>
     </div>
@@ -991,12 +989,17 @@ function aplicarEncabezado() {
 
 // ── Init ──────────────────────────────────────────────────────────────
 // ── Exportar a Word .docx ──────────────────────────────────────────────
-function exportarDocx() {
+function descargarBorrador() {
+  exportarDocx(true);
+}
+
+function exportarDocx(esBorrador) {
   if (typeof JSZip === 'undefined') {
     alert('La libreria JSZip no cargo. Verifica tu conexion a internet.'); return;
   }
-  var nombre = (document.getElementById('pdfName').value.trim() || 'Escrito_Judicial')
-               .replace(/[^a-zA-Z0-9_À-ɏ\s\-]/g,'_');
+  var base   = document.getElementById('pdfName').value.trim() || 'Escrito_Judicial';
+  var sufijo = esBorrador ? '_borrador' : '';
+  var nombre = (base + sufijo).replace(/[^a-zA-Z0-9_À-ɏ\s\-]/g,'_');
   var wrap  = document.getElementById('pagesWrap');
   var pages = wrap.querySelectorAll('.page');
   if (!pages.length) { alert('No hay contenido para exportar.'); return; }
@@ -1057,10 +1060,16 @@ function exportarDocx() {
     +'<w:rFonts w:ascii="'+fontName+'" w:hAnsi="'+fontName+'" w:cs="'+fontName+'"/>'
     +'<w:sz w:val="'+fsSz+'"/><w:szCs w:val="'+fsSz+'"/>'
     +'</w:rPr></w:rPrDefault>'
-    +'<w:pPrDefault><w:pPr><w:spacing w:after="0" w:before="0"/></w:pPr></w:pPrDefault>'
+    +'<w:pPrDefault><w:pPr>'
+    +'<w:jc w:val="both"/>'
+    +'<w:spacing w:line="'+LINE_SPACE+'" w:lineRule="exact" w:before="0" w:after="0"/>'
+    +'</w:pPr></w:pPrDefault>'
     +'</w:docDefaults>'
     +'<w:style w:type="paragraph" w:styleId="Normal" w:default="1"><w:name w:val="Normal"/>'
-    +'<w:pPr><w:spacing w:line="'+LINE_SPACE+'" w:lineRule="exact" w:before="0" w:after="0"/></w:pPr>'
+    +'<w:pPr>'
+    +'<w:jc w:val="both"/>'
+    +'<w:spacing w:line="'+LINE_SPACE+'" w:lineRule="exact" w:before="0" w:after="0"/>'
+    +'</w:pPr>'
     +'<w:rPr><w:rFonts w:ascii="'+fontName+'" w:hAnsi="'+fontName+'"/>'
     +'<w:sz w:val="'+fsSz+'"/></w:rPr></w:style>'
     +'</w:styles>';

@@ -342,7 +342,15 @@ body{background:#c8c4be;font-family:'Times New Roman',serif;min-height:100vh;pad
 </div>
 
 <div class="paste-zone" id="pasteZone">
-  <label>Pega el texto aqui (Ctrl+V) y elegí Reemplazar o Agregar. Cerrá cuando termines.</label>
+  <label>Zona de pegado de texto</label>
+  <div style="background:#fff;border:1px solid #e0d8ce;border-radius:5px;padding:.65rem 1rem;margin-bottom:.6rem;font-family:Arial,sans-serif;font-size:.76rem;color:#555;line-height:1.8">
+    <strong style="color:#1a2744">Primera vez o empezar de cero:</strong>
+    pegá el texto con <strong>Ctrl+V</strong> → hacé clic en <strong>✔ Reemplazar todo</strong><br>
+    <strong style="color:#1a6632">Para agregar más texto al final:</strong>
+    pegá la siguiente parte con <strong>Ctrl+V</strong> → hacé clic en <strong>＋ Agregar al final</strong><br>
+    <strong style="color:#c0392b">Cuando terminés:</strong>
+    hacé clic en <strong>✕ Cerrar</strong>
+  </div>
   <textarea id="txtInput" placeholder="Ctrl+V para pegar..."></textarea>
   <div class="paste-actions">
     <button class="rb primary" style="height:30px;font-size:.82rem" onclick="procesarTexto(false)">&#10004; Reemplazar todo</button>
